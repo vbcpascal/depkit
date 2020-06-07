@@ -24,6 +24,8 @@ namespace depkit
 	{
 	public:
 		PropExprUnary() : PropExpr(PropExprType::Unary) {}
+		PropExprUnary(UnaryType type, PropExprPtr& expr)
+		: PropExpr(PropExprType::Unary), expr_(expr) {}
 		
 	public:
 		UnaryType type_;
@@ -35,6 +37,8 @@ namespace depkit
 	{
 	public:
 		PropExprBinary() : PropExpr(PropExprType::Binary) {}
+		PropExprBinary(BinaryType type, PropExprPtr& lhs, PropExprPtr& rhs)
+		: PropExpr(PropExprType::Binary), lhs_(lhs), rhs_(rhs) {}
 
 	public:
 		BinaryType type_;
@@ -47,6 +51,9 @@ namespace depkit
 	class PropExprAtom : public PropExpr
 	{
 	public:
+		PropExprAtom(AtomType type, const PropName& prop_name, const std::string& string)
+			: PropExpr(PropExprType::Atom), type_(type), prop_name_(prop_name), string_(string) { }
+		
 		PropExprAtom(const PropName& prop_name, const std::string& string)
 		: PropExpr(PropExprType::Atom), prop_name_(prop_name), string_(string) { }
 

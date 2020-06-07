@@ -19,7 +19,7 @@ namespace depkit
 	enum class UnaryType : int { NOT, };
 	enum class BinaryType : int { AND, OR };
 	enum class AtomType : int {
-		GT, LT,	GE,	LE,	EQ,	NE,	IN,	NIN,
+		EQ,	NE, GT, LT,	GE,	LE,	IN,	NIN,
 	};
 
 	enum class PropLabel : int {

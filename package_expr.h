@@ -32,6 +32,8 @@ namespace depkit
 	{
 	public:
 		IfPackage() : PackageExpr(PackageExprType::If) { }
+		IfPackage(PropExprPtr& cond, PackageExprPtr& body)
+			: PackageExpr(PackageExprType::If), cond_(cond), body_(body) { }
 		
 	public:
 		PropExprPtr cond_;
@@ -44,6 +46,8 @@ namespace depkit
 	{
 	public:
 		IfElsePackage() : PackageExpr(PackageExprType::IfElse) { }
+		IfElsePackage(PropExprPtr& cond, PackageExprPtr& body, PackageExprPtr& else_body)
+			: PackageExpr(PackageExprType::If), cond_(cond), body_(body), else_body_(else_body) { }
 
 	public:
 		PropExprPtr cond_;
@@ -81,6 +85,10 @@ namespace depkit
 	class PackageExprAtomWithProp : public PackageExpr
 	{
 	public:
+		PackageExprAtomWithProp(AtomType type, const std::string& pack_name, const PropName& prop_name, const std::string& string)
+			: PackageExpr(PackageExprType::AtomWithProp), type_(type), pack_name_(pack_name),
+			prop_name_(prop_name), string_(string) { }
+
 		PackageExprAtomWithProp(const std::string& pack_name, const PropName& prop_name, const std::string& string)
 		: PackageExpr(PackageExprType::AtomWithProp), pack_name_(pack_name),
 		  prop_name_(prop_name), string_(string) { }

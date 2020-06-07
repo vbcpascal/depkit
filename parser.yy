@@ -43,8 +43,8 @@ TermsPtr terms;
 
 /* types */
 
-%type <std::string>		name str
-%type <TermsPtr>		terms
+%type <std::string>					name str
+%type <TermsPtr>					terms
 %type <std::list<DefinitionPtr>>	definitions
 %type <std::list<DependencyPtr>>    dependencies
 %type <std::list<RequirementPtr>>	requirements
@@ -56,8 +56,11 @@ TermsPtr terms;
 %type <std::list<std::string>>		tok_list
 %type <DefinitionPtr>				package_definition
 %type <DependencyPtr>				package_dependency dep_body
+%type <RequirementPtr>				requirement
 %type <std::list<PropExprPtr>>		require_list
-%type <PropExprPtr>					
+%type <std::list<PackageExprPtr>>	depend_list
+%type <PropExprPtr>					require_clause property_expr prop_expr_or prop_expr_and prop_expr_not prop_expr_atom
+%type <PackageExprPtr>				depend_clause if_package if_else_package package_expr package_expr_or package_expr_and package_expr_not package_expr_atom
 
 %start terms
 
@@ -126,103 +129,107 @@ require_list
 	;
 
 require_clause
-	: K_REQ S_LPR property_expr S_RPR S_SEMI
+	: K_REQ S_LPR property_expr S_RPR S_SEMI	{ $$ = $3; }
 	;
 
 depend_list
-	: depend_clause depend_list
-	| %empty
+	: depend_clause depend_list					{ $1.push_back($2); $$ = $1; }
+	| %empty									{ $$ = std::list<PackageExprPtr>(); }
 	;
 
 depend_clause
-	: package_expr
-	| if_package
-	| if_else_package
+	: package_expr								{ $$ = $1; }
+	| if_package								{ $$ = $1; }
+	| if_else_package							{ $$ = $1; }
 	;
 
 if_package
-	: K_IF property_expr S_LBR depend_clause S_RBR
+	: K_IF property_expr S_LBR depend_clause S_RBR	{ $$ = std::make_shared<IfPackagePtr>($2, $4); }
 	;
 
 if_else_package
-	: if_package K_ELSE S_LBR depend_clause S_RBR
+	: K_IF property_expr S_LBR depend_clause S_RBR K_ELSE S_LBR depend_clause S_RBR
+												{ $$ = std::make_shared<IfElsePackagePtr>($2, $4, $8); }
 	;
 
 property_expr
-	: prop_expr_or
+	: prop_expr_or								{ $$ = $1; }
 	;
 
 prop_expr_or
-	: prop_expr_and
-	| prop_expr_and S_OR prop_expr_or
+	: prop_expr_and								{ $$ = $1; }
+	| prop_expr_and S_OR prop_expr_or			{ $$ = std::make_shared<PropExprBinary>(BinaryType::OR, $1, $3); }
 	;
 
-prop_expr_and
-	: prop_expr_not
-	| prop_expr_not S_AND prop_expr_and
+prop_expr_and	
+	: prop_expr_not								{ $$ = $1; }
+	| prop_expr_not S_AND prop_expr_and			{ $$ = std::make_shared<PropExprBinary>(BinaryType::AND, $1, $3); }
 	;
 
 prop_expr_not
-	: prop_expr_atom
-	| S_NOT prop_expr_not
+	: prop_expr_atom							{ $$ = $1; }
+	| S_NOT prop_expr_not						{ $$ = std::make_shared<PropExprBinary>(UnaryType::NOT, $2); }
 	;
 
 prop_expr_atom
-	: prop_name S_EQ str
-	| prop_name S_NE str
-	| prop_name S_LT str
-	| prop_name S_GT str
-	| prop_name S_LE str
-	| prop_name S_GE str
-	| str K_IN prop_name
-	| str K_NIN prop_name
+	: prop_name S_EQ str						{ $$ = std::make_shared<PropExprAtom>(AtomType::EQ, $1, $3); }
+	| prop_name S_NE str						{ $$ = std::make_shared<PropExprAtom>(AtomType::NE, $1, $3); }
+	| prop_name S_GT str						{ $$ = std::make_shared<PropExprAtom>(AtomType::GT, $1, $3); }
+	| prop_name S_LT str						{ $$ = std::make_shared<PropExprAtom>(AtomType::LT, $1, $3); }
+	| prop_name S_GE str						{ $$ = std::make_shared<PropExprAtom>(AtomType::GE, $1, $3); }
+	| prop_name S_LE str						{ $$ = std::make_shared<PropExprAtom>(AtomType::LE, $1, $3); }
+	| str K_IN prop_name						{ $$ = std::make_shared<PropExprAtom>(AtomType::IN, $3, $1); }
+	| str K_NIN prop_name						{ $$ = std::make_shared<PropExprAtom>(AtomType::NIN, $3, $1); }
 	;
 
-	
 package_expr
-	: package_expr_or
+	: package_expr_or							{ $$ = $1; }
 	;
 
 package_expr_or
-	: package_expr_and
-	| package_expr_and S_OR package_expr_or
+	: package_expr_and							{ $$ = $1; }
+	| package_expr_and S_OR package_expr_or		{ $$ = std::make_shared<PackageExprBinary>(BinaryType::OR, $1, $3); }
 	;
 
 package_expr_and
-	: package_expr_not
-	| package_expr_not S_AND package_expr_and
+	: package_expr_not							{ $$ = $1; }
+	| package_expr_not S_AND package_expr_and	{ $$ = std::make_shared<PackageExprBinary>(BinaryType::AND, $1, $3); }
 	;
 
 package_expr_not
-	: package_expr_atom
-	| S_NOT package_expr_not
+	: package_expr_atom							{ $$ = $1; }
+	| S_NOT package_expr_not					{ $$ = std::make_shared<PackageExprBinary>(UnaryType::NOT, $2); }
 	;
 
 package_expr_atom
-	: name
-	| package_prop S_EQ str
-	| package_prop S_NE str
-	| package_prop S_LT str
-	| package_prop S_GT str
-	| package_prop S_LE str
-	| package_prop S_GE str
-	| str K_IN package_prop
-	| str K_NIN package_prop
-	;
-
-package_prop
-	: name S_DOT prop_name
+	: name										{ $$ = std::make_shared<PackageExprAtomWithName>($1); }
+	| name S_DOT prop_name S_EQ str				{ $$ = std::make_shared<PackageExprAtomWithProp>(AtomType::EQ, $1, $3, $5); }
+	| name S_DOT prop_name S_NE str				{ $$ = std::make_shared<PackageExprAtomWithProp>(AtomType::NE, $1, $3, $5); }
+	| name S_DOT prop_name S_GT str				{ $$ = std::make_shared<PackageExprAtomWithProp>(AtomType::GT, $1, $3, $5); }
+	| name S_DOT prop_name S_LT str				{ $$ = std::make_shared<PackageExprAtomWithProp>(AtomType::LT, $1, $3, $5); }
+	| name S_DOT prop_name S_GE str				{ $$ = std::make_shared<PackageExprAtomWithProp>(AtomType::GE, $1, $3, $5); }
+	| name S_DOT prop_name S_LE str				{ $$ = std::make_shared<PackageExprAtomWithProp>(AtomType::LE, $1, $3, $5); }
+	| str K_IN name S_DOT prop_name				{ $$ = std::make_shared<PackageExprAtomWithProp>(AtomType::IN, $5, $1, $3); }
+	| str K_NIN name S_DOT prop_name			{ $$ = std::make_shared<PackageExprAtomWithProp>(AtomType::NIN, $5, $1, $3); }
 	;
 
 requirement
-	: package_identification requirement
-	| %empty
+	: package_identification					{ $$ = std::make_shared<Requirement>($1); }
 	;
 
 name
-	: C_IDENTIFIER
+	: C_IDENTIFIER								{ $$ = $1; }
 	;
 
 str
-	: C_IDENTIFIER
+	: C_IDENTIFIER								{ $$ = $1; }
 	;
+
+%%
+
+void depkit::yy::Parser::error(const std::string& msg)
+{
+	std::cerr << msg << std::endl;
+	if (lexer.size() == 0) 
+		lexer.matcher().winput();
+}

@@ -8,6 +8,8 @@ namespace depkit
 	class Requirement
 	{
 	public:
+		Requirement() {}
+		Requirement(IdentificationPtr& req): requirement_(req) { }
 
 	public:
 		IdentificationPtr requirement_;
