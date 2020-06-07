@@ -43,7 +43,7 @@ TermsPtr terms;
 
 /* types */
 
-%type <std::string>					name str
+%type <std::string>					name str prop_name
 %type <TermsPtr>					terms
 %type <std::list<DefinitionPtr>>	definitions
 %type <std::list<DependencyPtr>>    dependencies
@@ -67,7 +67,7 @@ TermsPtr terms;
 %%
 
 terms
-	: definitions dependencies requirements		{ $$ = std::make_shared<Terms>($1, $2, $3);
+	: definitions dependencies requirements		{ $$ = std::make_shared<Terms>($1, $2, $3); }
 	;
 
 definitions
@@ -215,6 +215,10 @@ package_expr_atom
 
 requirement
 	: package_identification					{ $$ = std::make_shared<Requirement>($1); }
+	;
+
+prop_name
+	: C_IDENTIFIER								{ $$ = $1; }
 	;
 
 name
