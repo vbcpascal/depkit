@@ -16,12 +16,13 @@
 #define REFLEX_OPTION_bison_cc_namespace  depkit::yy
 #define REFLEX_OPTION_bison_cc_parser     Parser
 #define REFLEX_OPTION_bison_complete      true
+#define REFLEX_OPTION_bison_locations     true
 #define REFLEX_OPTION_header_file         "lex.hpp"
 #define REFLEX_OPTION_lex                 yylex
 #define REFLEX_OPTION_lexer               Lexer
 #define REFLEX_OPTION_namespace           depkit::yy
 #define REFLEX_OPTION_outfile             "lex.cpp"
-#define REFLEX_OPTION_token_eof           depkit::yy::Parser::symbol_type(0)
+#define REFLEX_OPTION_token_eof           depkit::yy::Parser::symbol_type(0, location())
 #define REFLEX_OPTION_token_type          depkit::yy::Parser::symbol_type
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -30,14 +31,14 @@
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 
-#line 6 "lex.l"
+#line 7 "lex.l"
 
-#include "parser.h"
+#include "parser.hpp"
 
-using namesapce depkit;
-using namesapce depkit::yy;
+using namespace depkit;
+using namespace depkit::yy;
 
-#define TOKEN(t) (Parser::make_##t((int)Parser::token::t))
+#define TOKEN(t) (Parser::make_##t((int)Parser::token::t, location()))
 extern int yylex();
 
 
@@ -77,6 +78,15 @@ class Lexer : public reflex::AbstractLexer<reflex::Matcher> {
   {
   }
   static const int INITIAL = 0;
+  virtual depkit::yy::location location(void) const
+  {
+    depkit::yy::location yylloc;
+    yylloc.begin.line = static_cast<unsigned int>(matcher().lineno());
+    yylloc.begin.column = static_cast<unsigned int>(matcher().columno());
+    yylloc.end.line = static_cast<unsigned int>(matcher().lineno_end());
+    yylloc.end.column = static_cast<unsigned int>(matcher().columno_end());
+    return yylloc;
+  }
   virtual depkit::yy::Parser::symbol_type yylex(void);
 };
 

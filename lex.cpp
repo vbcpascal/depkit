@@ -12,12 +12,13 @@
 #define REFLEX_OPTION_bison_cc_namespace  depkit::yy
 #define REFLEX_OPTION_bison_cc_parser     Parser
 #define REFLEX_OPTION_bison_complete      true
+#define REFLEX_OPTION_bison_locations     true
 #define REFLEX_OPTION_header_file         "lex.hpp"
 #define REFLEX_OPTION_lex                 yylex
 #define REFLEX_OPTION_lexer               Lexer
 #define REFLEX_OPTION_namespace           depkit::yy
 #define REFLEX_OPTION_outfile             "lex.cpp"
-#define REFLEX_OPTION_token_eof           depkit::yy::Parser::symbol_type(0)
+#define REFLEX_OPTION_token_eof           depkit::yy::Parser::symbol_type(0, location())
 #define REFLEX_OPTION_token_type          depkit::yy::Parser::symbol_type
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -26,14 +27,14 @@
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 
-#line 6 "lex.l"
+#line 7 "lex.l"
 
-#include "parser.h"
+#include "parser.hpp"
 
-using namesapce depkit;
-using namesapce depkit::yy;
+using namespace depkit;
+using namespace depkit::yy;
 
-#define TOKEN(t) (Parser::make_##t((int)Parser::token::t))
+#define TOKEN(t) (Parser::make_##t((int)Parser::token::t, location()))
 extern int yylex();
 
 
@@ -73,6 +74,15 @@ class Lexer : public reflex::AbstractLexer<reflex::Matcher> {
   {
   }
   static const int INITIAL = 0;
+  virtual depkit::yy::location location(void) const
+  {
+    depkit::yy::location yylloc;
+    yylloc.begin.line = static_cast<unsigned int>(matcher().lineno());
+    yylloc.begin.column = static_cast<unsigned int>(matcher().columno());
+    yylloc.end.line = static_cast<unsigned int>(matcher().lineno_end());
+    yylloc.end.column = static_cast<unsigned int>(matcher().columno_end());
+    return yylloc;
+  }
   virtual depkit::yy::Parser::symbol_type yylex(void);
 };
 
@@ -94,7 +104,7 @@ class Lexer : public reflex::AbstractLexer<reflex::Matcher> {
 
 depkit::yy::Parser::symbol_type depkit::yy::Lexer::yylex()
 {
-  static const char *REGEX_INITIAL = "(?m)((?:\\Q.\\E))|((?:\\Q,\\E))|((?:\\Q:\\E))|((?:\\Q;\\E))|((?:\\Q(\\E))|((?:\\Q)\\E))|((?:\\Q[\\E))|((?:\\Q]\\E))|((?:\\Q{\\E))|((?:\\Q}\\E))|((?:\\Q=\\E))|((?:\\Q==\\E))|((?:\\Q!=\\E))|((?:\\Q>=\\E))|((?:\\Q<=\\E))|((?:\\Q>\\E))|((?:\\Q<\\E))|((?:\\Q&&\\E))|((?:\\Q||\\E))|((?:\\Q!\\E))|((?:\\Qin\\E))|((?:\\Qnot in\\E))|((?:\\Qif\\E))|((?:\\Qelse\\E))|((?:\\Qrequire\\E))|((?:\\Qversion\\E))|((?:\\Qfeatures\\E))|((?:\\Qbackends\\E))|((?:[\\x09\\x0a\\x0d\\x20]+))|((?:(?://.*?\\n)|(?:/\\*.*?\\*/)))|((?:[A-Z_a-z][0-9A-Z_a-z]*))|((?:[\\x2b\\x2d]?[0-9]+\\.[0-9]*))|(.)";
+  static const char *REGEX_INITIAL = "(?m)((?:\\Q.\\E))|((?:\\Q,\\E))|((?:\\Q:\\E))|((?:\\Q;\\E))|((?:\\Q(\\E))|((?:\\Q)\\E))|((?:\\Q[\\E))|((?:\\Q]\\E))|((?:\\Q{\\E))|((?:\\Q}\\E))|((?:\\Q=\\E))|((?:\\Q==\\E))|((?:\\Q!=\\E))|((?:\\Q>=\\E))|((?:\\Q<=\\E))|((?:\\Q>\\E))|((?:\\Q<\\E))|((?:\\Q&&\\E))|((?:\\Q||\\E))|((?:\\Q!\\E))|((?:\\Q%%\\E))|((?:\\Qin\\E))|((?:\\Qnot in\\E))|((?:\\Qif\\E))|((?:\\Qelse\\E))|((?:\\Qrequire\\E))|((?:\\Qversion\\E))|((?:\\Qfeature\\E))|((?:\\Qbackend\\E))|((?:[\\x09\\x0a\\x0d\\x20]+))|((?:(?://.*?\\n)|(?:/\\*.*?\\*/)))|((?:[\\x2b\\x2d.0-9A-Z_a-z]*))|(.)";
   static const reflex::Pattern PATTERN_INITIAL(REGEX_INITIAL);
   if (!has_matcher())
   {
@@ -107,145 +117,145 @@ depkit::yy::Parser::symbol_type depkit::yy::Lexer::yylex()
           case 0:
             if (matcher().at_end())
             {
-              return depkit::yy::Parser::symbol_type(0);
+              return depkit::yy::Parser::symbol_type(0, location());
             }
             else
             {
               out().put(matcher().input());
             }
             break;
-          case 1: // rule at line 25: (?:\Q.\E)
-#line 25 "lex.l"
+          case 1: // rule at line 26: (?:\Q.\E)
+#line 26 "lex.l"
 return TOKEN(S_DOT);
             break;
-          case 2: // rule at line 26: (?:\Q,\E)
-#line 26 "lex.l"
+          case 2: // rule at line 27: (?:\Q,\E)
+#line 27 "lex.l"
 return TOKEN(S_COMMA);
             break;
-          case 3: // rule at line 27: (?:\Q:\E)
-#line 27 "lex.l"
+          case 3: // rule at line 28: (?:\Q:\E)
+#line 28 "lex.l"
 return TOKEN(S_COLON);
             break;
-          case 4: // rule at line 28: (?:\Q;\E)
-#line 28 "lex.l"
+          case 4: // rule at line 29: (?:\Q;\E)
+#line 29 "lex.l"
 return TOKEN(S_SEMI);
             break;
-          case 5: // rule at line 29: (?:\Q(\E)
-#line 29 "lex.l"
+          case 5: // rule at line 30: (?:\Q(\E)
+#line 30 "lex.l"
 return TOKEN(S_LPR);
             break;
-          case 6: // rule at line 30: (?:\Q)\E)
-#line 30 "lex.l"
+          case 6: // rule at line 31: (?:\Q)\E)
+#line 31 "lex.l"
 return TOKEN(S_RPR);
             break;
-          case 7: // rule at line 31: (?:\Q[\E)
-#line 31 "lex.l"
+          case 7: // rule at line 32: (?:\Q[\E)
+#line 32 "lex.l"
 return TOKEN(S_LSR);
             break;
-          case 8: // rule at line 32: (?:\Q]\E)
-#line 32 "lex.l"
+          case 8: // rule at line 33: (?:\Q]\E)
+#line 33 "lex.l"
 return TOKEN(S_RSR);
             break;
-          case 9: // rule at line 33: (?:\Q{\E)
-#line 33 "lex.l"
+          case 9: // rule at line 34: (?:\Q{\E)
+#line 34 "lex.l"
 return TOKEN(S_LBR);
             break;
-          case 10: // rule at line 34: (?:\Q}\E)
-#line 34 "lex.l"
+          case 10: // rule at line 35: (?:\Q}\E)
+#line 35 "lex.l"
 return TOKEN(S_RBR);
             break;
-          case 11: // rule at line 35: (?:\Q=\E)
-#line 35 "lex.l"
+          case 11: // rule at line 36: (?:\Q=\E)
+#line 36 "lex.l"
 return TOKEN(S_ASSIGN);
             break;
-          case 12: // rule at line 36: (?:\Q==\E)
-#line 36 "lex.l"
+          case 12: // rule at line 37: (?:\Q==\E)
+#line 37 "lex.l"
 return TOKEN(S_EQ);
             break;
-          case 13: // rule at line 37: (?:\Q!=\E)
-#line 37 "lex.l"
+          case 13: // rule at line 38: (?:\Q!=\E)
+#line 38 "lex.l"
 return TOKEN(S_NE);
             break;
-          case 14: // rule at line 38: (?:\Q>=\E)
-#line 38 "lex.l"
+          case 14: // rule at line 39: (?:\Q>=\E)
+#line 39 "lex.l"
 return TOKEN(S_GE);
             break;
-          case 15: // rule at line 39: (?:\Q<=\E)
-#line 39 "lex.l"
+          case 15: // rule at line 40: (?:\Q<=\E)
+#line 40 "lex.l"
 return TOKEN(S_LE);
             break;
-          case 16: // rule at line 40: (?:\Q>\E)
-#line 40 "lex.l"
+          case 16: // rule at line 41: (?:\Q>\E)
+#line 41 "lex.l"
 return TOKEN(S_GT);
             break;
-          case 17: // rule at line 41: (?:\Q<\E)
-#line 41 "lex.l"
+          case 17: // rule at line 42: (?:\Q<\E)
+#line 42 "lex.l"
 return TOKEN(S_LT);
             break;
-          case 18: // rule at line 42: (?:\Q&&\E)
-#line 42 "lex.l"
+          case 18: // rule at line 43: (?:\Q&&\E)
+#line 43 "lex.l"
 return TOKEN(S_AND);
             break;
-          case 19: // rule at line 43: (?:\Q||\E)
-#line 43 "lex.l"
+          case 19: // rule at line 44: (?:\Q||\E)
+#line 44 "lex.l"
 return TOKEN(S_OR);
             break;
-          case 20: // rule at line 44: (?:\Q!\E)
-#line 44 "lex.l"
+          case 20: // rule at line 45: (?:\Q!\E)
+#line 45 "lex.l"
 return TOKEN(S_NOT);
             break;
-          case 21: // rule at line 45: (?:\Qin\E)
-#line 45 "lex.l"
+          case 21: // rule at line 46: (?:\Q%%\E)
+#line 46 "lex.l"
+return TOKEN(S_SEP);
+            break;
+          case 22: // rule at line 47: (?:\Qin\E)
+#line 47 "lex.l"
 return TOKEN(K_IN);
             break;
-          case 22: // rule at line 46: (?:\Qnot in\E)
-#line 46 "lex.l"
+          case 23: // rule at line 48: (?:\Qnot in\E)
+#line 48 "lex.l"
 return TOKEN(K_NIN);
             break;
-          case 23: // rule at line 47: (?:\Qif\E)
-#line 47 "lex.l"
+          case 24: // rule at line 49: (?:\Qif\E)
+#line 49 "lex.l"
 return TOKEN(K_IF);
             break;
-          case 24: // rule at line 48: (?:\Qelse\E)
-#line 48 "lex.l"
+          case 25: // rule at line 50: (?:\Qelse\E)
+#line 50 "lex.l"
 return TOKEN(K_ELSE);
             break;
-          case 25: // rule at line 49: (?:\Qrequire\E)
-#line 49 "lex.l"
+          case 26: // rule at line 51: (?:\Qrequire\E)
+#line 51 "lex.l"
 return TOKEN(K_REQ);
             break;
-          case 26: // rule at line 50: (?:\Qversion\E)
-#line 50 "lex.l"
+          case 27: // rule at line 52: (?:\Qversion\E)
+#line 52 "lex.l"
 return TOKEN(K_V);
             break;
-          case 27: // rule at line 51: (?:\Qfeatures\E)
-#line 51 "lex.l"
+          case 28: // rule at line 53: (?:\Qfeature\E)
+#line 53 "lex.l"
 return TOKEN(K_F);
             break;
-          case 28: // rule at line 52: (?:\Qbackends\E)
-#line 52 "lex.l"
+          case 29: // rule at line 54: (?:\Qbackend\E)
+#line 54 "lex.l"
 return TOKEN(K_B);
 
             break;
-          case 29: // rule at line 54: (?:[\x09\x0a\x0d\x20]+)
-#line 54 "lex.l"
-; /* skip */
-            break;
-          case 30: // rule at line 55: (?:(?://.*?\n)|(?:/\*.*?\*/))
-#line 55 "lex.l"
-; /* skip */
-            break;
-          case 31: // rule at line 56: (?:[A-Z_a-z][0-9A-Z_a-z]*)
+          case 30: // rule at line 56: (?:[\x09\x0a\x0d\x20]+)
 #line 56 "lex.l"
-return Parser::make_C_IDENTIFIER(str());
+; /* skip */
             break;
-          case 32: // rule at line 57: (?:[\x2b\x2d]?[0-9]+\.[0-9]*)
+          case 31: // rule at line 57: (?:(?://.*?\n)|(?:/\*.*?\*/))
 #line 57 "lex.l"
-return Parser::make_C_DOUBLE(atof(text()));
+; /* skip */
+            break;
+          case 32: // rule at line 58: (?:[\x2b\x2d.0-9A-Z_a-z]*)
+#line 58 "lex.l"
+return Parser::make_C_IDENTIFIER(str(), location());
 
             break;
-          case 33: // rule at line 59: .
-#line 59 "lex.l"
+          case 33: // rule at line 60: .
+#line 60 "lex.l"
 ERROR("Unknown token: %s", text());
 
             break;

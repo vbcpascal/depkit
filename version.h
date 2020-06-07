@@ -2,20 +2,19 @@
 
 #include <string>
 
-namespace depkit
+namespace depkit {
+using Version = std::string;
+/*
+class Version
 {
-	using Version = std::string;
-	/*
-	class Version
-	{
-	public:
-		Version(const std::string& str)
-		{
-			
-		}
-		
-		int major;
-		int minor;
-		int build;
-	};*/
-}
+public:
+        Version(const std::string& str)
+        {
+
+        }
+
+        int major;
+        int minor;
+        int build;
+};*/
+} // namespace depkit

@@ -34,7 +34,7 @@
 // are private implementation details.  Do not rely on them.
 
 // //                    "%code top" blocks.
-#line 12 "parser.yy"
+#line 16 "parser.yy"
 
 #include <cstdio>
 #include <map>
@@ -49,7 +49,7 @@
 
 
 // Unqualified %code blocks.
-#line 29 "parser.yy"
+#line 33 "parser.yy"
 
 TermsPtr terms;
 
@@ -81,6 +81,25 @@ TermsPtr terms;
 # endif
 #endif
 
+#define YYRHSLOC(Rhs, K) ((Rhs)[K].location)
+/* YYLLOC_DEFAULT -- Set CURRENT to span from RHS[1] to RHS[N].
+   If N is 0, then set CURRENT to the empty location which ends
+   the previous symbol: RHS[0] (always defined).  */
+
+# ifndef YYLLOC_DEFAULT
+#  define YYLLOC_DEFAULT(Current, Rhs, N)                               \
+    do                                                                  \
+      if (N)                                                            \
+        {                                                               \
+          (Current).begin  = YYRHSLOC (Rhs, 1).begin;                   \
+          (Current).end    = YYRHSLOC (Rhs, N).end;                     \
+        }                                                               \
+      else                                                              \
+        {                                                               \
+          (Current).begin = (Current).end = YYRHSLOC (Rhs, 0).end;      \
+        }                                                               \
+    while (false)
+# endif
 
 
 // Suppress unused-variable warnings by "using" E.
@@ -133,7 +152,48 @@ TermsPtr terms;
 
 #line 5 "parser.yy"
 namespace depkit { namespace yy {
-#line 137 "parser.cpp"
+#line 156 "parser.cpp"
+
+
+  /* Return YYSTR after stripping away unnecessary quotes and
+     backslashes, so that it's suitable for yyerror.  The heuristic is
+     that double-quoting is unnecessary unless the string contains an
+     apostrophe, a comma, or backslash (other than backslash-backslash).
+     YYSTR is taken from yytname.  */
+  std::string
+  Parser::yytnamerr_ (const char *yystr)
+  {
+    if (*yystr == '"')
+      {
+        std::string yyr;
+        char const *yyp = yystr;
+
+        for (;;)
+          switch (*++yyp)
+            {
+            case '\'':
+            case ',':
+              goto do_not_strip_quotes;
+
+            case '\\':
+              if (*++yyp != '\\')
+                goto do_not_strip_quotes;
+              else
+                goto append;
+
+            append:
+            default:
+              yyr += *yyp;
+              break;
+
+            case '"':
+              return yyr;
+            }
+      do_not_strip_quotes: ;
+      }
+
+    return yystr;
+  }
 
 
   /// Build a parser object.
@@ -197,52 +257,52 @@ namespace depkit { namespace yy {
   {}
 
   Parser::stack_symbol_type::stack_symbol_type (YY_RVREF (stack_symbol_type) that)
-    : super_type (YY_MOVE (that.state))
+    : super_type (YY_MOVE (that.state), YY_MOVE (that.location))
   {
     switch (that.type_get ())
     {
-      case 44: // package_definition
+      case 46: // package_definition
         value.YY_MOVE_OR_COPY< DefinitionPtr > (YY_MOVE (that.value));
         break;
 
-      case 45: // package_dependency
-      case 46: // dep_body
+      case 47: // package_dependency
+      case 48: // dep_body
         value.YY_MOVE_OR_COPY< DependencyPtr > (YY_MOVE (that.value));
         break;
 
-      case 38: // package_identification
+      case 39: // package_identification
         value.YY_MOVE_OR_COPY< IdentificationPtr > (YY_MOVE (that.value));
         break;
 
-      case 50: // depend_clause
-      case 51: // if_package
-      case 52: // if_else_package
-      case 58: // package_expr
-      case 59: // package_expr_or
-      case 60: // package_expr_and
-      case 61: // package_expr_not
-      case 62: // package_expr_atom
+      case 52: // depend_clause
+      case 53: // if_package
+      case 54: // if_else_package
+      case 60: // package_expr
+      case 61: // package_expr_or
+      case 62: // package_expr_and
+      case 63: // package_expr_not
+      case 64: // package_expr_atom
         value.YY_MOVE_OR_COPY< PackageExprPtr > (YY_MOVE (that.value));
         break;
 
-      case 48: // require_clause
-      case 53: // property_expr
-      case 54: // prop_expr_or
-      case 55: // prop_expr_and
-      case 56: // prop_expr_not
-      case 57: // prop_expr_atom
+      case 50: // require_clause
+      case 55: // property_expr
+      case 56: // prop_expr_or
+      case 57: // prop_expr_and
+      case 58: // prop_expr_not
+      case 59: // prop_expr_atom
         value.YY_MOVE_OR_COPY< PropExprPtr > (YY_MOVE (that.value));
         break;
 
-      case 39: // property_list
+      case 40: // property_list
         value.YY_MOVE_OR_COPY< PropertyListPtr > (YY_MOVE (that.value));
         break;
 
-      case 63: // requirement
+      case 65: // requirement
         value.YY_MOVE_OR_COPY< RequirementPtr > (YY_MOVE (that.value));
         break;
 
-      case 34: // terms
+      case 35: // terms
         value.YY_MOVE_OR_COPY< TermsPtr > (YY_MOVE (that.value));
         break;
 
@@ -270,57 +330,50 @@ namespace depkit { namespace yy {
       case 22: // S_AND
       case 23: // S_OR
       case 24: // S_NOT
-      case 25: // K_IN
-      case 26: // K_NIN
-      case 27: // K_IF
-      case 28: // K_ELSE
-      case 29: // K_REQ
-      case 30: // K_V
-      case 31: // K_F
-      case 32: // K_B
+      case 25: // S_SEP
+      case 26: // K_IN
+      case 27: // K_NIN
+      case 28: // K_IF
+      case 29: // K_ELSE
+      case 30: // K_REQ
+      case 31: // K_V
+      case 32: // K_F
+      case 33: // K_B
         value.YY_MOVE_OR_COPY< int > (YY_MOVE (that.value));
         break;
 
-      case 42: // backend_list
-        value.YY_MOVE_OR_COPY< std::list<Backend> > (YY_MOVE (that.value));
-        break;
-
-      case 35: // definitions
+      case 36: // definitions
         value.YY_MOVE_OR_COPY< std::list<DefinitionPtr> > (YY_MOVE (that.value));
         break;
 
-      case 36: // dependencies
+      case 37: // dependencies
         value.YY_MOVE_OR_COPY< std::list<DependencyPtr> > (YY_MOVE (that.value));
         break;
 
-      case 41: // feature_list
-        value.YY_MOVE_OR_COPY< std::list<Feature> > (YY_MOVE (that.value));
-        break;
-
-      case 49: // depend_list
+      case 51: // depend_list
         value.YY_MOVE_OR_COPY< std::list<PackageExprPtr> > (YY_MOVE (that.value));
         break;
 
-      case 47: // require_list
+      case 49: // require_list
         value.YY_MOVE_OR_COPY< std::list<PropExprPtr> > (YY_MOVE (that.value));
         break;
 
-      case 37: // requirements
+      case 38: // requirements
         value.YY_MOVE_OR_COPY< std::list<RequirementPtr> > (YY_MOVE (that.value));
         break;
 
-      case 40: // version_list
-        value.YY_MOVE_OR_COPY< std::list<Version> > (YY_MOVE (that.value));
-        break;
-
-      case 43: // tok_list
+      case 41: // version_list
+      case 42: // feature_list
+      case 43: // backend_list
+      case 44: // tok_list
+      case 45: // tok_list_nonempty
         value.YY_MOVE_OR_COPY< std::list<std::string> > (YY_MOVE (that.value));
         break;
 
       case 3: // C_IDENTIFIER
-      case 64: // prop_name
-      case 65: // name
-      case 66: // str
+      case 66: // prop_name
+      case 67: // name
+      case 68: // str
         value.YY_MOVE_OR_COPY< std::string > (YY_MOVE (that.value));
         break;
 
@@ -335,52 +388,52 @@ namespace depkit { namespace yy {
   }
 
   Parser::stack_symbol_type::stack_symbol_type (state_type s, YY_MOVE_REF (symbol_type) that)
-    : super_type (s)
+    : super_type (s, YY_MOVE (that.location))
   {
     switch (that.type_get ())
     {
-      case 44: // package_definition
+      case 46: // package_definition
         value.move< DefinitionPtr > (YY_MOVE (that.value));
         break;
 
-      case 45: // package_dependency
-      case 46: // dep_body
+      case 47: // package_dependency
+      case 48: // dep_body
         value.move< DependencyPtr > (YY_MOVE (that.value));
         break;
 
-      case 38: // package_identification
+      case 39: // package_identification
         value.move< IdentificationPtr > (YY_MOVE (that.value));
         break;
 
-      case 50: // depend_clause
-      case 51: // if_package
-      case 52: // if_else_package
-      case 58: // package_expr
-      case 59: // package_expr_or
-      case 60: // package_expr_and
-      case 61: // package_expr_not
-      case 62: // package_expr_atom
+      case 52: // depend_clause
+      case 53: // if_package
+      case 54: // if_else_package
+      case 60: // package_expr
+      case 61: // package_expr_or
+      case 62: // package_expr_and
+      case 63: // package_expr_not
+      case 64: // package_expr_atom
         value.move< PackageExprPtr > (YY_MOVE (that.value));
         break;
 
-      case 48: // require_clause
-      case 53: // property_expr
-      case 54: // prop_expr_or
-      case 55: // prop_expr_and
-      case 56: // prop_expr_not
-      case 57: // prop_expr_atom
+      case 50: // require_clause
+      case 55: // property_expr
+      case 56: // prop_expr_or
+      case 57: // prop_expr_and
+      case 58: // prop_expr_not
+      case 59: // prop_expr_atom
         value.move< PropExprPtr > (YY_MOVE (that.value));
         break;
 
-      case 39: // property_list
+      case 40: // property_list
         value.move< PropertyListPtr > (YY_MOVE (that.value));
         break;
 
-      case 63: // requirement
+      case 65: // requirement
         value.move< RequirementPtr > (YY_MOVE (that.value));
         break;
 
-      case 34: // terms
+      case 35: // terms
         value.move< TermsPtr > (YY_MOVE (that.value));
         break;
 
@@ -408,57 +461,50 @@ namespace depkit { namespace yy {
       case 22: // S_AND
       case 23: // S_OR
       case 24: // S_NOT
-      case 25: // K_IN
-      case 26: // K_NIN
-      case 27: // K_IF
-      case 28: // K_ELSE
-      case 29: // K_REQ
-      case 30: // K_V
-      case 31: // K_F
-      case 32: // K_B
+      case 25: // S_SEP
+      case 26: // K_IN
+      case 27: // K_NIN
+      case 28: // K_IF
+      case 29: // K_ELSE
+      case 30: // K_REQ
+      case 31: // K_V
+      case 32: // K_F
+      case 33: // K_B
         value.move< int > (YY_MOVE (that.value));
         break;
 
-      case 42: // backend_list
-        value.move< std::list<Backend> > (YY_MOVE (that.value));
-        break;
-
-      case 35: // definitions
+      case 36: // definitions
         value.move< std::list<DefinitionPtr> > (YY_MOVE (that.value));
         break;
 
-      case 36: // dependencies
+      case 37: // dependencies
         value.move< std::list<DependencyPtr> > (YY_MOVE (that.value));
         break;
 
-      case 41: // feature_list
-        value.move< std::list<Feature> > (YY_MOVE (that.value));
-        break;
-
-      case 49: // depend_list
+      case 51: // depend_list
         value.move< std::list<PackageExprPtr> > (YY_MOVE (that.value));
         break;
 
-      case 47: // require_list
+      case 49: // require_list
         value.move< std::list<PropExprPtr> > (YY_MOVE (that.value));
         break;
 
-      case 37: // requirements
+      case 38: // requirements
         value.move< std::list<RequirementPtr> > (YY_MOVE (that.value));
         break;
 
-      case 40: // version_list
-        value.move< std::list<Version> > (YY_MOVE (that.value));
-        break;
-
-      case 43: // tok_list
+      case 41: // version_list
+      case 42: // feature_list
+      case 43: // backend_list
+      case 44: // tok_list
+      case 45: // tok_list_nonempty
         value.move< std::list<std::string> > (YY_MOVE (that.value));
         break;
 
       case 3: // C_IDENTIFIER
-      case 64: // prop_name
-      case 65: // name
-      case 66: // str
+      case 66: // prop_name
+      case 67: // name
+      case 68: // str
         value.move< std::string > (YY_MOVE (that.value));
         break;
 
@@ -477,48 +523,48 @@ namespace depkit { namespace yy {
     state = that.state;
     switch (that.type_get ())
     {
-      case 44: // package_definition
+      case 46: // package_definition
         value.move< DefinitionPtr > (that.value);
         break;
 
-      case 45: // package_dependency
-      case 46: // dep_body
+      case 47: // package_dependency
+      case 48: // dep_body
         value.move< DependencyPtr > (that.value);
         break;
 
-      case 38: // package_identification
+      case 39: // package_identification
         value.move< IdentificationPtr > (that.value);
         break;
 
-      case 50: // depend_clause
-      case 51: // if_package
-      case 52: // if_else_package
-      case 58: // package_expr
-      case 59: // package_expr_or
-      case 60: // package_expr_and
-      case 61: // package_expr_not
-      case 62: // package_expr_atom
+      case 52: // depend_clause
+      case 53: // if_package
+      case 54: // if_else_package
+      case 60: // package_expr
+      case 61: // package_expr_or
+      case 62: // package_expr_and
+      case 63: // package_expr_not
+      case 64: // package_expr_atom
         value.move< PackageExprPtr > (that.value);
         break;
 
-      case 48: // require_clause
-      case 53: // property_expr
-      case 54: // prop_expr_or
-      case 55: // prop_expr_and
-      case 56: // prop_expr_not
-      case 57: // prop_expr_atom
+      case 50: // require_clause
+      case 55: // property_expr
+      case 56: // prop_expr_or
+      case 57: // prop_expr_and
+      case 58: // prop_expr_not
+      case 59: // prop_expr_atom
         value.move< PropExprPtr > (that.value);
         break;
 
-      case 39: // property_list
+      case 40: // property_list
         value.move< PropertyListPtr > (that.value);
         break;
 
-      case 63: // requirement
+      case 65: // requirement
         value.move< RequirementPtr > (that.value);
         break;
 
-      case 34: // terms
+      case 35: // terms
         value.move< TermsPtr > (that.value);
         break;
 
@@ -546,57 +592,50 @@ namespace depkit { namespace yy {
       case 22: // S_AND
       case 23: // S_OR
       case 24: // S_NOT
-      case 25: // K_IN
-      case 26: // K_NIN
-      case 27: // K_IF
-      case 28: // K_ELSE
-      case 29: // K_REQ
-      case 30: // K_V
-      case 31: // K_F
-      case 32: // K_B
+      case 25: // S_SEP
+      case 26: // K_IN
+      case 27: // K_NIN
+      case 28: // K_IF
+      case 29: // K_ELSE
+      case 30: // K_REQ
+      case 31: // K_V
+      case 32: // K_F
+      case 33: // K_B
         value.move< int > (that.value);
         break;
 
-      case 42: // backend_list
-        value.move< std::list<Backend> > (that.value);
-        break;
-
-      case 35: // definitions
+      case 36: // definitions
         value.move< std::list<DefinitionPtr> > (that.value);
         break;
 
-      case 36: // dependencies
+      case 37: // dependencies
         value.move< std::list<DependencyPtr> > (that.value);
         break;
 
-      case 41: // feature_list
-        value.move< std::list<Feature> > (that.value);
-        break;
-
-      case 49: // depend_list
+      case 51: // depend_list
         value.move< std::list<PackageExprPtr> > (that.value);
         break;
 
-      case 47: // require_list
+      case 49: // require_list
         value.move< std::list<PropExprPtr> > (that.value);
         break;
 
-      case 37: // requirements
+      case 38: // requirements
         value.move< std::list<RequirementPtr> > (that.value);
         break;
 
-      case 40: // version_list
-        value.move< std::list<Version> > (that.value);
-        break;
-
-      case 43: // tok_list
+      case 41: // version_list
+      case 42: // feature_list
+      case 43: // backend_list
+      case 44: // tok_list
+      case 45: // tok_list_nonempty
         value.move< std::list<std::string> > (that.value);
         break;
 
       case 3: // C_IDENTIFIER
-      case 64: // prop_name
-      case 65: // name
-      case 66: // str
+      case 66: // prop_name
+      case 67: // name
+      case 68: // str
         value.move< std::string > (that.value);
         break;
 
@@ -604,6 +643,7 @@ namespace depkit { namespace yy {
         break;
     }
 
+    location = that.location;
     // that is emptied.
     that.state = empty_state;
     return *this;
@@ -634,7 +674,8 @@ namespace depkit { namespace yy {
       std::abort ();
 #endif
     yyo << (yytype < yyntokens_ ? "token" : "nterm")
-        << ' ' << yytname_[yytype] << " (";
+        << ' ' << yytname_[yytype] << " ("
+        << yysym.location << ": ";
     YYUSE (yytype);
     yyo << ')';
   }
@@ -734,6 +775,9 @@ namespace depkit { namespace yy {
 
     /// The lookahead symbol.
     symbol_type yyla;
+
+    /// The locations where the error started and ended.
+    stack_symbol_type yyerror_range[3];
 
     /// The return value of parse ().
     int yyresult;
@@ -844,48 +888,48 @@ namespace depkit { namespace yy {
          when using variants.  */
       switch (yyr1_[yyn])
     {
-      case 44: // package_definition
+      case 46: // package_definition
         yylhs.value.emplace< DefinitionPtr > ();
         break;
 
-      case 45: // package_dependency
-      case 46: // dep_body
+      case 47: // package_dependency
+      case 48: // dep_body
         yylhs.value.emplace< DependencyPtr > ();
         break;
 
-      case 38: // package_identification
+      case 39: // package_identification
         yylhs.value.emplace< IdentificationPtr > ();
         break;
 
-      case 50: // depend_clause
-      case 51: // if_package
-      case 52: // if_else_package
-      case 58: // package_expr
-      case 59: // package_expr_or
-      case 60: // package_expr_and
-      case 61: // package_expr_not
-      case 62: // package_expr_atom
+      case 52: // depend_clause
+      case 53: // if_package
+      case 54: // if_else_package
+      case 60: // package_expr
+      case 61: // package_expr_or
+      case 62: // package_expr_and
+      case 63: // package_expr_not
+      case 64: // package_expr_atom
         yylhs.value.emplace< PackageExprPtr > ();
         break;
 
-      case 48: // require_clause
-      case 53: // property_expr
-      case 54: // prop_expr_or
-      case 55: // prop_expr_and
-      case 56: // prop_expr_not
-      case 57: // prop_expr_atom
+      case 50: // require_clause
+      case 55: // property_expr
+      case 56: // prop_expr_or
+      case 57: // prop_expr_and
+      case 58: // prop_expr_not
+      case 59: // prop_expr_atom
         yylhs.value.emplace< PropExprPtr > ();
         break;
 
-      case 39: // property_list
+      case 40: // property_list
         yylhs.value.emplace< PropertyListPtr > ();
         break;
 
-      case 63: // requirement
+      case 65: // requirement
         yylhs.value.emplace< RequirementPtr > ();
         break;
 
-      case 34: // terms
+      case 35: // terms
         yylhs.value.emplace< TermsPtr > ();
         break;
 
@@ -913,57 +957,50 @@ namespace depkit { namespace yy {
       case 22: // S_AND
       case 23: // S_OR
       case 24: // S_NOT
-      case 25: // K_IN
-      case 26: // K_NIN
-      case 27: // K_IF
-      case 28: // K_ELSE
-      case 29: // K_REQ
-      case 30: // K_V
-      case 31: // K_F
-      case 32: // K_B
+      case 25: // S_SEP
+      case 26: // K_IN
+      case 27: // K_NIN
+      case 28: // K_IF
+      case 29: // K_ELSE
+      case 30: // K_REQ
+      case 31: // K_V
+      case 32: // K_F
+      case 33: // K_B
         yylhs.value.emplace< int > ();
         break;
 
-      case 42: // backend_list
-        yylhs.value.emplace< std::list<Backend> > ();
-        break;
-
-      case 35: // definitions
+      case 36: // definitions
         yylhs.value.emplace< std::list<DefinitionPtr> > ();
         break;
 
-      case 36: // dependencies
+      case 37: // dependencies
         yylhs.value.emplace< std::list<DependencyPtr> > ();
         break;
 
-      case 41: // feature_list
-        yylhs.value.emplace< std::list<Feature> > ();
-        break;
-
-      case 49: // depend_list
+      case 51: // depend_list
         yylhs.value.emplace< std::list<PackageExprPtr> > ();
         break;
 
-      case 47: // require_list
+      case 49: // require_list
         yylhs.value.emplace< std::list<PropExprPtr> > ();
         break;
 
-      case 37: // requirements
+      case 38: // requirements
         yylhs.value.emplace< std::list<RequirementPtr> > ();
         break;
 
-      case 40: // version_list
-        yylhs.value.emplace< std::list<Version> > ();
-        break;
-
-      case 43: // tok_list
+      case 41: // version_list
+      case 42: // feature_list
+      case 43: // backend_list
+      case 44: // tok_list
+      case 45: // tok_list_nonempty
         yylhs.value.emplace< std::list<std::string> > ();
         break;
 
       case 3: // C_IDENTIFIER
-      case 64: // prop_name
-      case 65: // name
-      case 66: // str
+      case 66: // prop_name
+      case 67: // name
+      case 68: // str
         yylhs.value.emplace< std::string > ();
         break;
 
@@ -972,6 +1009,12 @@ namespace depkit { namespace yy {
     }
 
 
+      // Default location.
+      {
+        stack_type::slice range (yystack_, yylen);
+        YYLLOC_DEFAULT (yylhs.location, range, yylen);
+        yyerror_range[1].location = yylhs.location;
+      }
 
       // Perform the reduction.
       YY_REDUCE_PRINT (yyn);
@@ -982,379 +1025,403 @@ namespace depkit { namespace yy {
           switch (yyn)
             {
   case 2:
-#line 70 "parser.yy"
-    { yylhs.value.as < TermsPtr > () = std::make_shared<Terms>(yystack_[2].value.as < std::list<DefinitionPtr> > (), yystack_[1].value.as < std::list<DependencyPtr> > (), yystack_[0].value.as < std::list<RequirementPtr> > ()); }
-#line 988 "parser.cpp"
+#line 72 "parser.yy"
+    { yylhs.value.as < TermsPtr > () = std::make_shared<Terms>(yystack_[4].value.as < std::list<DefinitionPtr> > (), yystack_[2].value.as < std::list<DependencyPtr> > (), yystack_[0].value.as < std::list<RequirementPtr> > ()); }
+#line 1031 "parser.cpp"
     break;
 
   case 3:
-#line 74 "parser.yy"
+#line 76 "parser.yy"
     { yystack_[1].value.as < std::list<DefinitionPtr> > ().push_back(yystack_[0].value.as < DefinitionPtr > ()); yylhs.value.as < std::list<DefinitionPtr> > () = yystack_[1].value.as < std::list<DefinitionPtr> > (); }
-#line 994 "parser.cpp"
+#line 1037 "parser.cpp"
     break;
 
   case 4:
-#line 75 "parser.yy"
-    { yylhs.value.as < std::list<DefinitionPtr> > () = std::list<DefinitonPtr>(); }
-#line 1000 "parser.cpp"
+#line 77 "parser.yy"
+    { yylhs.value.as < std::list<DefinitionPtr> > () = std::list<DefinitionPtr>(); }
+#line 1043 "parser.cpp"
     break;
 
   case 5:
-#line 79 "parser.yy"
+#line 81 "parser.yy"
     { yystack_[1].value.as < std::list<DependencyPtr> > ().push_back(yystack_[0].value.as < DependencyPtr > ()); yylhs.value.as < std::list<DependencyPtr> > () = yystack_[1].value.as < std::list<DependencyPtr> > (); }
-#line 1006 "parser.cpp"
+#line 1049 "parser.cpp"
     break;
 
   case 6:
-#line 80 "parser.yy"
+#line 82 "parser.yy"
     { yylhs.value.as < std::list<DependencyPtr> > () = std::list<DependencyPtr>(); }
-#line 1012 "parser.cpp"
+#line 1055 "parser.cpp"
     break;
 
   case 7:
-#line 84 "parser.yy"
+#line 86 "parser.yy"
     { yystack_[1].value.as < std::list<RequirementPtr> > ().push_back(yystack_[0].value.as < RequirementPtr > ()); yylhs.value.as < std::list<RequirementPtr> > () = yystack_[1].value.as < std::list<RequirementPtr> > (); }
-#line 1018 "parser.cpp"
+#line 1061 "parser.cpp"
     break;
 
   case 8:
-#line 85 "parser.yy"
+#line 87 "parser.yy"
     { yylhs.value.as < std::list<RequirementPtr> > () = std::list<RequirementPtr>(); }
-#line 1024 "parser.cpp"
+#line 1067 "parser.cpp"
     break;
 
   case 9:
-#line 89 "parser.yy"
+#line 91 "parser.yy"
     { yylhs.value.as < IdentificationPtr > () = std::make_shared<Identification>(yystack_[3].value.as < std::string > (), yystack_[1].value.as < PropertyListPtr > ()); }
-#line 1030 "parser.cpp"
+#line 1073 "parser.cpp"
     break;
 
   case 10:
-#line 94 "parser.yy"
-    { yylhs.value.as < PropertyListPtr > () = std::make_shared<PropertyList>(yystack_[4].value.as < std::list<Version> > (), yystack_[2].value.as < std::list<Feature> > (), yystack_[0].value.as < std::list<Backend> > ()); }
-#line 1036 "parser.cpp"
+#line 96 "parser.yy"
+    { yylhs.value.as < PropertyListPtr > () = std::make_shared<PropertyList>(yystack_[5].value.as < std::list<std::string> > (), yystack_[3].value.as < std::list<std::string> > (), yystack_[1].value.as < std::list<std::string> > ()); }
+#line 1079 "parser.cpp"
     break;
 
   case 11:
-#line 98 "parser.yy"
-    { yylhs.value.as < std::list<Version> > () = yystack_[1].value.as < std::list<std::string> > (); }
-#line 1042 "parser.cpp"
+#line 100 "parser.yy"
+    { yylhs.value.as < std::list<std::string> > () = yystack_[1].value.as < std::list<std::string> > (); }
+#line 1085 "parser.cpp"
     break;
 
   case 12:
-#line 102 "parser.yy"
-    { yylhs.value.as < std::list<Feature> > () = yystack_[1].value.as < std::list<std::string> > (); }
-#line 1048 "parser.cpp"
+#line 104 "parser.yy"
+    { yylhs.value.as < std::list<std::string> > () = yystack_[1].value.as < std::list<std::string> > (); }
+#line 1091 "parser.cpp"
     break;
 
   case 13:
-#line 106 "parser.yy"
-    { yylhs.value.as < std::list<Backend> > () = yystack_[1].value.as < std::list<std::string> > (); }
-#line 1054 "parser.cpp"
+#line 108 "parser.yy"
+    { yylhs.value.as < std::list<std::string> > () = yystack_[1].value.as < std::list<std::string> > (); }
+#line 1097 "parser.cpp"
     break;
 
   case 14:
-#line 110 "parser.yy"
-    { yystack_[2].value.as < std::list<std::string> > ().push_back(yystack_[0].value.as < std::string > ()); yylhs.value.as < std::list<std::string> > () = yystack_[2].value.as < std::list<std::string> > (); }
-#line 1060 "parser.cpp"
+#line 112 "parser.yy"
+    { yylhs.value.as < std::list<std::string> > () = yystack_[0].value.as < std::list<std::string> > (); }
+#line 1103 "parser.cpp"
     break;
 
   case 15:
-#line 111 "parser.yy"
+#line 113 "parser.yy"
     { yylhs.value.as < std::list<std::string> > () = std::list<std::string>(); }
-#line 1066 "parser.cpp"
+#line 1109 "parser.cpp"
     break;
 
   case 16:
-#line 115 "parser.yy"
-    { yylhs.value.as < DefinitionPtr > () = std::make_shared<Definition>(yystack_[3].value.as < IdentificationPtr > ()); }
-#line 1072 "parser.cpp"
+#line 117 "parser.yy"
+    { yystack_[2].value.as < std::list<std::string> > ().push_back(yystack_[0].value.as < std::string > ()); yylhs.value.as < std::list<std::string> > () = yystack_[2].value.as < std::list<std::string> > (); }
+#line 1115 "parser.cpp"
     break;
 
   case 17:
-#line 119 "parser.yy"
-    { yystack_[0].value.as < DependencyPtr > ()->identification_ = yystack_[2].value.as < IdentificationPtr > (); yylhs.value.as < DependencyPtr > () = yystack_[0].value.as < DependencyPtr > (); }
-#line 1078 "parser.cpp"
+#line 118 "parser.yy"
+    { yylhs.value.as < std::list<std::string> > () = std::list<std::string>(); yylhs.value.as < std::list<std::string> > ().push_back(yystack_[0].value.as < std::string > ()); }
+#line 1121 "parser.cpp"
     break;
 
   case 18:
-#line 123 "parser.yy"
-    { yylhs.value.as < DependencyPtr > () = std::make_shared<Dependency>(yystack_[2].value.as < std::list<PropExprPtr> > (), yystack_[1].value.as < std::list<PackageExprPtr> > ()); }
-#line 1084 "parser.cpp"
+#line 122 "parser.yy"
+    { yylhs.value.as < DefinitionPtr > () = std::make_shared<Definition>(yystack_[3].value.as < IdentificationPtr > ()); }
+#line 1127 "parser.cpp"
     break;
 
   case 19:
-#line 127 "parser.yy"
-    { yystack_[1].value.as < std::list<PropExprPtr> > ().push_back(yystack_[0].value.as < PropExprPtr > ()); yylhs.value.as < std::list<PropExprPtr> > () = yystack_[1].value.as < std::list<PropExprPtr> > (); }
-#line 1090 "parser.cpp"
+#line 126 "parser.yy"
+    { yystack_[0].value.as < DependencyPtr > ()->identification_ = yystack_[2].value.as < IdentificationPtr > (); yylhs.value.as < DependencyPtr > () = yystack_[0].value.as < DependencyPtr > (); }
+#line 1133 "parser.cpp"
     break;
 
   case 20:
-#line 128 "parser.yy"
-    { yylhs.value.as < std::list<PropExprPtr> > () = std::list<PropExprPtr>(); }
-#line 1096 "parser.cpp"
+#line 130 "parser.yy"
+    { yylhs.value.as < DependencyPtr > () = std::make_shared<Dependency>(yystack_[2].value.as < std::list<PropExprPtr> > (), yystack_[1].value.as < std::list<PackageExprPtr> > ()); }
+#line 1139 "parser.cpp"
     break;
 
   case 21:
-#line 132 "parser.yy"
-    { yylhs.value.as < PropExprPtr > () = yystack_[2].value.as < PropExprPtr > (); }
-#line 1102 "parser.cpp"
+#line 134 "parser.yy"
+    { yystack_[1].value.as < std::list<PropExprPtr> > ().push_back(yystack_[0].value.as < PropExprPtr > ()); yylhs.value.as < std::list<PropExprPtr> > () = yystack_[1].value.as < std::list<PropExprPtr> > (); }
+#line 1145 "parser.cpp"
     break;
 
   case 22:
-#line 136 "parser.yy"
-    { yystack_[1].value.as < PackageExprPtr > ().push_back(yystack_[0].value.as < std::list<PackageExprPtr> > ()); yylhs.value.as < std::list<PackageExprPtr> > () = yystack_[1].value.as < PackageExprPtr > (); }
-#line 1108 "parser.cpp"
+#line 135 "parser.yy"
+    { yylhs.value.as < std::list<PropExprPtr> > () = std::list<PropExprPtr>(); }
+#line 1151 "parser.cpp"
     break;
 
   case 23:
-#line 137 "parser.yy"
-    { yylhs.value.as < std::list<PackageExprPtr> > () = std::list<PackageExprPtr>(); }
-#line 1114 "parser.cpp"
+#line 139 "parser.yy"
+    { yylhs.value.as < PropExprPtr > () = yystack_[2].value.as < PropExprPtr > (); }
+#line 1157 "parser.cpp"
     break;
 
   case 24:
-#line 141 "parser.yy"
-    { yylhs.value.as < PackageExprPtr > () = yystack_[0].value.as < PackageExprPtr > (); }
-#line 1120 "parser.cpp"
+#line 143 "parser.yy"
+    { yystack_[1].value.as < std::list<PackageExprPtr> > ().push_back(yystack_[0].value.as < PackageExprPtr > ()); yylhs.value.as < std::list<PackageExprPtr> > () = yystack_[1].value.as < std::list<PackageExprPtr> > (); }
+#line 1163 "parser.cpp"
     break;
 
   case 25:
-#line 142 "parser.yy"
-    { yylhs.value.as < PackageExprPtr > () = yystack_[0].value.as < PackageExprPtr > (); }
-#line 1126 "parser.cpp"
+#line 144 "parser.yy"
+    { yylhs.value.as < std::list<PackageExprPtr> > () = std::list<PackageExprPtr>(); }
+#line 1169 "parser.cpp"
     break;
 
   case 26:
-#line 143 "parser.yy"
+#line 148 "parser.yy"
     { yylhs.value.as < PackageExprPtr > () = yystack_[0].value.as < PackageExprPtr > (); }
-#line 1132 "parser.cpp"
+#line 1175 "parser.cpp"
     break;
 
   case 27:
-#line 147 "parser.yy"
-    { yylhs.value.as < PackageExprPtr > () = std::make_shared<IfPackagePtr>(yystack_[3].value.as < PropExprPtr > (), yystack_[1].value.as < PackageExprPtr > ()); }
-#line 1138 "parser.cpp"
+#line 149 "parser.yy"
+    { yylhs.value.as < PackageExprPtr > () = yystack_[0].value.as < PackageExprPtr > (); }
+#line 1181 "parser.cpp"
     break;
 
   case 28:
-#line 152 "parser.yy"
-    { yylhs.value.as < PackageExprPtr > () = std::make_shared<IfElsePackagePtr>(yystack_[7].value.as < PropExprPtr > (), yystack_[5].value.as < PackageExprPtr > (), yystack_[1].value.as < PackageExprPtr > ()); }
-#line 1144 "parser.cpp"
+#line 150 "parser.yy"
+    { yylhs.value.as < PackageExprPtr > () = yystack_[0].value.as < PackageExprPtr > (); }
+#line 1187 "parser.cpp"
     break;
 
   case 29:
-#line 156 "parser.yy"
-    { yylhs.value.as < PropExprPtr > () = yystack_[0].value.as < PropExprPtr > (); }
-#line 1150 "parser.cpp"
+#line 154 "parser.yy"
+    { yylhs.value.as < PackageExprPtr > () = std::make_shared<IfPackage>(yystack_[3].value.as < PropExprPtr > (), yystack_[1].value.as < PackageExprPtr > ()); }
+#line 1193 "parser.cpp"
     break;
 
   case 30:
-#line 160 "parser.yy"
-    { yylhs.value.as < PropExprPtr > () = yystack_[0].value.as < PropExprPtr > (); }
-#line 1156 "parser.cpp"
+#line 159 "parser.yy"
+    { yylhs.value.as < PackageExprPtr > () = std::make_shared<IfElsePackage>(yystack_[7].value.as < PropExprPtr > (), yystack_[5].value.as < PackageExprPtr > (), yystack_[1].value.as < PackageExprPtr > ()); }
+#line 1199 "parser.cpp"
     break;
 
   case 31:
-#line 161 "parser.yy"
-    { yylhs.value.as < PropExprPtr > () = std::make_shared<PropExprBinary>(BinaryType::OR, yystack_[2].value.as < PropExprPtr > (), yystack_[0].value.as < PropExprPtr > ()); }
-#line 1162 "parser.cpp"
+#line 163 "parser.yy"
+    { yylhs.value.as < PropExprPtr > () = yystack_[0].value.as < PropExprPtr > (); }
+#line 1205 "parser.cpp"
     break;
 
   case 32:
-#line 165 "parser.yy"
+#line 167 "parser.yy"
     { yylhs.value.as < PropExprPtr > () = yystack_[0].value.as < PropExprPtr > (); }
-#line 1168 "parser.cpp"
+#line 1211 "parser.cpp"
     break;
 
   case 33:
-#line 166 "parser.yy"
-    { yylhs.value.as < PropExprPtr > () = std::make_shared<PropExprBinary>(BinaryType::AND, yystack_[2].value.as < PropExprPtr > (), yystack_[0].value.as < PropExprPtr > ()); }
-#line 1174 "parser.cpp"
+#line 168 "parser.yy"
+    { yylhs.value.as < PropExprPtr > () = std::make_shared<PropExprBinary>(BinaryType::OR, yystack_[2].value.as < PropExprPtr > (), yystack_[0].value.as < PropExprPtr > ()); }
+#line 1217 "parser.cpp"
     break;
 
   case 34:
-#line 170 "parser.yy"
+#line 172 "parser.yy"
     { yylhs.value.as < PropExprPtr > () = yystack_[0].value.as < PropExprPtr > (); }
-#line 1180 "parser.cpp"
+#line 1223 "parser.cpp"
     break;
 
   case 35:
-#line 171 "parser.yy"
-    { yylhs.value.as < PropExprPtr > () = std::make_shared<PropExprBinary>(UnaryType::NOT, yystack_[0].value.as < PropExprPtr > ()); }
-#line 1186 "parser.cpp"
+#line 173 "parser.yy"
+    { yylhs.value.as < PropExprPtr > () = std::make_shared<PropExprBinary>(BinaryType::AND, yystack_[2].value.as < PropExprPtr > (), yystack_[0].value.as < PropExprPtr > ()); }
+#line 1229 "parser.cpp"
     break;
 
   case 36:
-#line 175 "parser.yy"
-    { yylhs.value.as < PropExprPtr > () = std::make_shared<PropExprAtom>(AtomType::EQ, yystack_[2].value.as < std::string > (), yystack_[0].value.as < std::string > ()); }
-#line 1192 "parser.cpp"
+#line 177 "parser.yy"
+    { yylhs.value.as < PropExprPtr > () = yystack_[0].value.as < PropExprPtr > (); }
+#line 1235 "parser.cpp"
     break;
 
   case 37:
-#line 176 "parser.yy"
-    { yylhs.value.as < PropExprPtr > () = std::make_shared<PropExprAtom>(AtomType::NE, yystack_[2].value.as < std::string > (), yystack_[0].value.as < std::string > ()); }
-#line 1198 "parser.cpp"
+#line 178 "parser.yy"
+    { yylhs.value.as < PropExprPtr > () = std::make_shared<PropExprUnary>(UnaryType::NOT, yystack_[0].value.as < PropExprPtr > ()); }
+#line 1241 "parser.cpp"
     break;
 
   case 38:
-#line 177 "parser.yy"
-    { yylhs.value.as < PropExprPtr > () = std::make_shared<PropExprAtom>(AtomType::GT, yystack_[2].value.as < std::string > (), yystack_[0].value.as < std::string > ()); }
-#line 1204 "parser.cpp"
+#line 182 "parser.yy"
+    { yylhs.value.as < PropExprPtr > () = std::make_shared<PropExprAtom>(AtomType::EQ, yystack_[2].value.as < std::string > (), yystack_[0].value.as < std::string > ()); }
+#line 1247 "parser.cpp"
     break;
 
   case 39:
-#line 178 "parser.yy"
-    { yylhs.value.as < PropExprPtr > () = std::make_shared<PropExprAtom>(AtomType::LT, yystack_[2].value.as < std::string > (), yystack_[0].value.as < std::string > ()); }
-#line 1210 "parser.cpp"
+#line 183 "parser.yy"
+    { yylhs.value.as < PropExprPtr > () = std::make_shared<PropExprAtom>(AtomType::NE, yystack_[2].value.as < std::string > (), yystack_[0].value.as < std::string > ()); }
+#line 1253 "parser.cpp"
     break;
 
   case 40:
-#line 179 "parser.yy"
-    { yylhs.value.as < PropExprPtr > () = std::make_shared<PropExprAtom>(AtomType::GE, yystack_[2].value.as < std::string > (), yystack_[0].value.as < std::string > ()); }
-#line 1216 "parser.cpp"
+#line 184 "parser.yy"
+    { yylhs.value.as < PropExprPtr > () = std::make_shared<PropExprAtom>(AtomType::GT, yystack_[2].value.as < std::string > (), yystack_[0].value.as < std::string > ()); }
+#line 1259 "parser.cpp"
     break;
 
   case 41:
-#line 180 "parser.yy"
-    { yylhs.value.as < PropExprPtr > () = std::make_shared<PropExprAtom>(AtomType::LE, yystack_[2].value.as < std::string > (), yystack_[0].value.as < std::string > ()); }
-#line 1222 "parser.cpp"
+#line 185 "parser.yy"
+    { yylhs.value.as < PropExprPtr > () = std::make_shared<PropExprAtom>(AtomType::LT, yystack_[2].value.as < std::string > (), yystack_[0].value.as < std::string > ()); }
+#line 1265 "parser.cpp"
     break;
 
   case 42:
-#line 181 "parser.yy"
-    { yylhs.value.as < PropExprPtr > () = std::make_shared<PropExprAtom>(AtomType::IN, yystack_[0].value.as < std::string > (), yystack_[2].value.as < std::string > ()); }
-#line 1228 "parser.cpp"
+#line 186 "parser.yy"
+    { yylhs.value.as < PropExprPtr > () = std::make_shared<PropExprAtom>(AtomType::GE, yystack_[2].value.as < std::string > (), yystack_[0].value.as < std::string > ()); }
+#line 1271 "parser.cpp"
     break;
 
   case 43:
-#line 182 "parser.yy"
-    { yylhs.value.as < PropExprPtr > () = std::make_shared<PropExprAtom>(AtomType::NIN, yystack_[0].value.as < std::string > (), yystack_[2].value.as < std::string > ()); }
-#line 1234 "parser.cpp"
+#line 187 "parser.yy"
+    { yylhs.value.as < PropExprPtr > () = std::make_shared<PropExprAtom>(AtomType::LE, yystack_[2].value.as < std::string > (), yystack_[0].value.as < std::string > ()); }
+#line 1277 "parser.cpp"
     break;
 
   case 44:
-#line 186 "parser.yy"
-    { yylhs.value.as < PackageExprPtr > () = yystack_[0].value.as < PackageExprPtr > (); }
-#line 1240 "parser.cpp"
+#line 188 "parser.yy"
+    { yylhs.value.as < PropExprPtr > () = std::make_shared<PropExprAtom>(AtomType::IN, yystack_[0].value.as < std::string > (), yystack_[2].value.as < std::string > ()); }
+#line 1283 "parser.cpp"
     break;
 
   case 45:
-#line 190 "parser.yy"
-    { yylhs.value.as < PackageExprPtr > () = yystack_[0].value.as < PackageExprPtr > (); }
-#line 1246 "parser.cpp"
+#line 189 "parser.yy"
+    { yylhs.value.as < PropExprPtr > () = std::make_shared<PropExprAtom>(AtomType::NIN, yystack_[0].value.as < std::string > (), yystack_[2].value.as < std::string > ()); }
+#line 1289 "parser.cpp"
     break;
 
   case 46:
-#line 191 "parser.yy"
-    { yylhs.value.as < PackageExprPtr > () = std::make_shared<PackageExprBinary>(BinaryType::OR, yystack_[2].value.as < PackageExprPtr > (), yystack_[0].value.as < PackageExprPtr > ()); }
-#line 1252 "parser.cpp"
+#line 193 "parser.yy"
+    { yylhs.value.as < PackageExprPtr > () = yystack_[0].value.as < PackageExprPtr > (); }
+#line 1295 "parser.cpp"
     break;
 
   case 47:
-#line 195 "parser.yy"
+#line 197 "parser.yy"
     { yylhs.value.as < PackageExprPtr > () = yystack_[0].value.as < PackageExprPtr > (); }
-#line 1258 "parser.cpp"
+#line 1301 "parser.cpp"
     break;
 
   case 48:
-#line 196 "parser.yy"
-    { yylhs.value.as < PackageExprPtr > () = std::make_shared<PackageExprBinary>(BinaryType::AND, yystack_[2].value.as < PackageExprPtr > (), yystack_[0].value.as < PackageExprPtr > ()); }
-#line 1264 "parser.cpp"
+#line 198 "parser.yy"
+    { yylhs.value.as < PackageExprPtr > () = std::make_shared<PackageExprBinary>(BinaryType::OR, yystack_[2].value.as < PackageExprPtr > (), yystack_[0].value.as < PackageExprPtr > ()); }
+#line 1307 "parser.cpp"
     break;
 
   case 49:
-#line 200 "parser.yy"
+#line 202 "parser.yy"
     { yylhs.value.as < PackageExprPtr > () = yystack_[0].value.as < PackageExprPtr > (); }
-#line 1270 "parser.cpp"
+#line 1313 "parser.cpp"
     break;
 
   case 50:
-#line 201 "parser.yy"
-    { yylhs.value.as < PackageExprPtr > () = std::make_shared<PackageExprBinary>(UnaryType::NOT, yystack_[0].value.as < PackageExprPtr > ()); }
-#line 1276 "parser.cpp"
+#line 203 "parser.yy"
+    { yylhs.value.as < PackageExprPtr > () = std::make_shared<PackageExprBinary>(BinaryType::AND, yystack_[2].value.as < PackageExprPtr > (), yystack_[0].value.as < PackageExprPtr > ()); }
+#line 1319 "parser.cpp"
     break;
 
   case 51:
-#line 205 "parser.yy"
-    { yylhs.value.as < PackageExprPtr > () = std::make_shared<PackageExprAtomWithName>(yystack_[0].value.as < std::string > ()); }
-#line 1282 "parser.cpp"
+#line 207 "parser.yy"
+    { yylhs.value.as < PackageExprPtr > () = yystack_[0].value.as < PackageExprPtr > (); }
+#line 1325 "parser.cpp"
     break;
 
   case 52:
-#line 206 "parser.yy"
-    { yylhs.value.as < PackageExprPtr > () = std::make_shared<PackageExprAtomWithProp>(AtomType::EQ, yystack_[4].value.as < std::string > (), yystack_[2].value.as < std::string > (), yystack_[0].value.as < std::string > ()); }
-#line 1288 "parser.cpp"
+#line 208 "parser.yy"
+    { yylhs.value.as < PackageExprPtr > () = std::make_shared<PackageExprUnary>(UnaryType::NOT, yystack_[0].value.as < PackageExprPtr > ()); }
+#line 1331 "parser.cpp"
     break;
 
   case 53:
-#line 207 "parser.yy"
-    { yylhs.value.as < PackageExprPtr > () = std::make_shared<PackageExprAtomWithProp>(AtomType::NE, yystack_[4].value.as < std::string > (), yystack_[2].value.as < std::string > (), yystack_[0].value.as < std::string > ()); }
-#line 1294 "parser.cpp"
+#line 212 "parser.yy"
+    { yylhs.value.as < PackageExprPtr > () = std::make_shared<PackageExprAtomWithName>(yystack_[0].value.as < std::string > ()); }
+#line 1337 "parser.cpp"
     break;
 
   case 54:
-#line 208 "parser.yy"
-    { yylhs.value.as < PackageExprPtr > () = std::make_shared<PackageExprAtomWithProp>(AtomType::GT, yystack_[4].value.as < std::string > (), yystack_[2].value.as < std::string > (), yystack_[0].value.as < std::string > ()); }
-#line 1300 "parser.cpp"
+#line 213 "parser.yy"
+    { yylhs.value.as < PackageExprPtr > () = std::make_shared<PackageExprAtomWithProp>(AtomType::EQ, yystack_[4].value.as < std::string > (), yystack_[2].value.as < std::string > (), yystack_[0].value.as < std::string > ()); }
+#line 1343 "parser.cpp"
     break;
 
   case 55:
-#line 209 "parser.yy"
-    { yylhs.value.as < PackageExprPtr > () = std::make_shared<PackageExprAtomWithProp>(AtomType::LT, yystack_[4].value.as < std::string > (), yystack_[2].value.as < std::string > (), yystack_[0].value.as < std::string > ()); }
-#line 1306 "parser.cpp"
+#line 214 "parser.yy"
+    { yylhs.value.as < PackageExprPtr > () = std::make_shared<PackageExprAtomWithProp>(AtomType::NE, yystack_[4].value.as < std::string > (), yystack_[2].value.as < std::string > (), yystack_[0].value.as < std::string > ()); }
+#line 1349 "parser.cpp"
     break;
 
   case 56:
-#line 210 "parser.yy"
-    { yylhs.value.as < PackageExprPtr > () = std::make_shared<PackageExprAtomWithProp>(AtomType::GE, yystack_[4].value.as < std::string > (), yystack_[2].value.as < std::string > (), yystack_[0].value.as < std::string > ()); }
-#line 1312 "parser.cpp"
+#line 215 "parser.yy"
+    { yylhs.value.as < PackageExprPtr > () = std::make_shared<PackageExprAtomWithProp>(AtomType::GT, yystack_[4].value.as < std::string > (), yystack_[2].value.as < std::string > (), yystack_[0].value.as < std::string > ()); }
+#line 1355 "parser.cpp"
     break;
 
   case 57:
-#line 211 "parser.yy"
-    { yylhs.value.as < PackageExprPtr > () = std::make_shared<PackageExprAtomWithProp>(AtomType::LE, yystack_[4].value.as < std::string > (), yystack_[2].value.as < std::string > (), yystack_[0].value.as < std::string > ()); }
-#line 1318 "parser.cpp"
+#line 216 "parser.yy"
+    { yylhs.value.as < PackageExprPtr > () = std::make_shared<PackageExprAtomWithProp>(AtomType::LT, yystack_[4].value.as < std::string > (), yystack_[2].value.as < std::string > (), yystack_[0].value.as < std::string > ()); }
+#line 1361 "parser.cpp"
     break;
 
   case 58:
-#line 212 "parser.yy"
-    { yylhs.value.as < PackageExprPtr > () = std::make_shared<PackageExprAtomWithProp>(AtomType::IN, yystack_[0].value.as < std::string > (), yystack_[4].value.as < std::string > (), yystack_[2].value.as < std::string > ()); }
-#line 1324 "parser.cpp"
+#line 217 "parser.yy"
+    { yylhs.value.as < PackageExprPtr > () = std::make_shared<PackageExprAtomWithProp>(AtomType::GE, yystack_[4].value.as < std::string > (), yystack_[2].value.as < std::string > (), yystack_[0].value.as < std::string > ()); }
+#line 1367 "parser.cpp"
     break;
 
   case 59:
-#line 213 "parser.yy"
-    { yylhs.value.as < PackageExprPtr > () = std::make_shared<PackageExprAtomWithProp>(AtomType::NIN, yystack_[0].value.as < std::string > (), yystack_[4].value.as < std::string > (), yystack_[2].value.as < std::string > ()); }
-#line 1330 "parser.cpp"
+#line 218 "parser.yy"
+    { yylhs.value.as < PackageExprPtr > () = std::make_shared<PackageExprAtomWithProp>(AtomType::LE, yystack_[4].value.as < std::string > (), yystack_[2].value.as < std::string > (), yystack_[0].value.as < std::string > ()); }
+#line 1373 "parser.cpp"
     break;
 
   case 60:
-#line 217 "parser.yy"
-    { yylhs.value.as < RequirementPtr > () = std::make_shared<Requirement>(yystack_[0].value.as < IdentificationPtr > ()); }
-#line 1336 "parser.cpp"
+#line 219 "parser.yy"
+    { yylhs.value.as < PackageExprPtr > () = std::make_shared<PackageExprAtomWithProp>(AtomType::IN, yystack_[0].value.as < std::string > (), yystack_[4].value.as < std::string > (), yystack_[2].value.as < std::string > ()); }
+#line 1379 "parser.cpp"
     break;
 
   case 61:
-#line 221 "parser.yy"
-    { yylhs.value.as < std::string > () = yystack_[0].value.as < std::string > (); }
-#line 1342 "parser.cpp"
+#line 220 "parser.yy"
+    { yylhs.value.as < PackageExprPtr > () = std::make_shared<PackageExprAtomWithProp>(AtomType::NIN, yystack_[0].value.as < std::string > (), yystack_[4].value.as < std::string > (), yystack_[2].value.as < std::string > ()); }
+#line 1385 "parser.cpp"
     break;
 
   case 62:
-#line 225 "parser.yy"
-    { yylhs.value.as < std::string > () = yystack_[0].value.as < std::string > (); }
-#line 1348 "parser.cpp"
+#line 224 "parser.yy"
+    { yylhs.value.as < RequirementPtr > () = std::make_shared<Requirement>(yystack_[0].value.as < IdentificationPtr > ()); }
+#line 1391 "parser.cpp"
     break;
 
   case 63:
+#line 228 "parser.yy"
+    { yylhs.value.as < std::string > () = "version"; }
+#line 1397 "parser.cpp"
+    break;
+
+  case 64:
 #line 229 "parser.yy"
+    { yylhs.value.as < std::string > () = "feature"; }
+#line 1403 "parser.cpp"
+    break;
+
+  case 65:
+#line 230 "parser.yy"
+    { yylhs.value.as < std::string > () = "backend"; }
+#line 1409 "parser.cpp"
+    break;
+
+  case 66:
+#line 234 "parser.yy"
     { yylhs.value.as < std::string > () = yystack_[0].value.as < std::string > (); }
-#line 1354 "parser.cpp"
+#line 1415 "parser.cpp"
+    break;
+
+  case 67:
+#line 238 "parser.yy"
+    { yylhs.value.as < std::string > () = yystack_[0].value.as < std::string > (); }
+#line 1421 "parser.cpp"
     break;
 
 
-#line 1358 "parser.cpp"
+#line 1425 "parser.cpp"
 
             default:
               break;
@@ -1387,10 +1454,11 @@ namespace depkit { namespace yy {
     if (!yyerrstatus_)
       {
         ++yynerrs_;
-        error (yysyntax_error_ (yystack_[0].state, yyla));
+        error (yyla.location, yysyntax_error_ (yystack_[0].state, yyla));
       }
 
 
+    yyerror_range[1].location = yyla.location;
     if (yyerrstatus_ == 3)
       {
         /* If just tried and failed to reuse lookahead token after an
@@ -1451,11 +1519,14 @@ namespace depkit { namespace yy {
           if (yystack_.size () == 1)
             YYABORT;
 
+          yyerror_range[1].location = yystack_[0].location;
           yy_destroy_ ("Error: popping", yystack_[0]);
           yypop_ ();
           YY_STACK_PRINT ();
         }
 
+      yyerror_range[2].location = yyla.location;
+      YYLLOC_DEFAULT (error_token.location, yyerror_range, 2);
 
       // Shift the error token.
       error_token.state = yyn;
@@ -1520,156 +1591,248 @@ namespace depkit { namespace yy {
   void
   Parser::error (const syntax_error& yyexc)
   {
-    error (yyexc.what ());
+    error (yyexc.location, yyexc.what ());
   }
 
   // Generate an error message.
   std::string
-  Parser::yysyntax_error_ (state_type, const symbol_type&) const
+  Parser::yysyntax_error_ (state_type yystate, const symbol_type& yyla) const
   {
-    return YY_("syntax error");
+    // Number of reported tokens (one for the "unexpected", one per
+    // "expected").
+    size_t yycount = 0;
+    // Its maximum.
+    enum { YYERROR_VERBOSE_ARGS_MAXIMUM = 5 };
+    // Arguments of yyformat.
+    char const *yyarg[YYERROR_VERBOSE_ARGS_MAXIMUM];
+
+    /* There are many possibilities here to consider:
+       - If this state is a consistent state with a default action, then
+         the only way this function was invoked is if the default action
+         is an error action.  In that case, don't check for expected
+         tokens because there are none.
+       - The only way there can be no lookahead present (in yyla) is
+         if this state is a consistent state with a default action.
+         Thus, detecting the absence of a lookahead is sufficient to
+         determine that there is no unexpected or expected token to
+         report.  In that case, just report a simple "syntax error".
+       - Don't assume there isn't a lookahead just because this state is
+         a consistent state with a default action.  There might have
+         been a previous inconsistent state, consistent state with a
+         non-default action, or user semantic action that manipulated
+         yyla.  (However, yyla is currently not documented for users.)
+       - Of course, the expected token list depends on states to have
+         correct lookahead information, and it depends on the parser not
+         to perform extra reductions after fetching a lookahead from the
+         scanner and before detecting a syntax error.  Thus, state
+         merging (from LALR or IELR) and default reductions corrupt the
+         expected token list.  However, the list is correct for
+         canonical LR with one exception: it will still contain any
+         token that will not be accepted due to an error action in a
+         later state.
+    */
+    if (!yyla.empty ())
+      {
+        int yytoken = yyla.type_get ();
+        yyarg[yycount++] = yytname_[yytoken];
+        int yyn = yypact_[yystate];
+        if (!yy_pact_value_is_default_ (yyn))
+          {
+            /* Start YYX at -YYN if negative to avoid negative indexes in
+               YYCHECK.  In other words, skip the first -YYN actions for
+               this state because they are default actions.  */
+            int yyxbegin = yyn < 0 ? -yyn : 0;
+            // Stay within bounds of both yycheck and yytname.
+            int yychecklim = yylast_ - yyn + 1;
+            int yyxend = yychecklim < yyntokens_ ? yychecklim : yyntokens_;
+            for (int yyx = yyxbegin; yyx < yyxend; ++yyx)
+              if (yycheck_[yyx + yyn] == yyx && yyx != yyterror_
+                  && !yy_table_value_is_error_ (yytable_[yyx + yyn]))
+                {
+                  if (yycount == YYERROR_VERBOSE_ARGS_MAXIMUM)
+                    {
+                      yycount = 1;
+                      break;
+                    }
+                  else
+                    yyarg[yycount++] = yytname_[yyx];
+                }
+          }
+      }
+
+    char const* yyformat = YY_NULLPTR;
+    switch (yycount)
+      {
+#define YYCASE_(N, S)                         \
+        case N:                               \
+          yyformat = S;                       \
+        break
+      default: // Avoid compiler warnings.
+        YYCASE_ (0, YY_("syntax error"));
+        YYCASE_ (1, YY_("syntax error, unexpected %s"));
+        YYCASE_ (2, YY_("syntax error, unexpected %s, expecting %s"));
+        YYCASE_ (3, YY_("syntax error, unexpected %s, expecting %s or %s"));
+        YYCASE_ (4, YY_("syntax error, unexpected %s, expecting %s or %s or %s"));
+        YYCASE_ (5, YY_("syntax error, unexpected %s, expecting %s or %s or %s or %s"));
+#undef YYCASE_
+      }
+
+    std::string yyres;
+    // Argument number.
+    size_t yyi = 0;
+    for (char const* yyp = yyformat; *yyp; ++yyp)
+      if (yyp[0] == '%' && yyp[1] == 's' && yyi < yycount)
+        {
+          yyres += yytnamerr_ (yyarg[yyi++]);
+          ++yyp;
+        }
+      else
+        yyres += *yyp;
+    return yyres;
   }
 
 
-  const signed char Parser::yypact_ninf_ = -73;
+  const signed char Parser::yypact_ninf_ = -96;
 
-  const signed char Parser::yytable_ninf_ = -64;
+  const signed char Parser::yytable_ninf_ = -68;
 
   const signed char
   Parser::yypact_[] =
   {
-     -73,    17,    21,   -73,   -73,    21,     5,   -73,    14,    21,
-      53,   -73,    19,    31,   -73,   -73,    49,    54,    56,    61,
-      66,   -73,   -73,   -73,    68,   -73,    52,     2,   -73,    75,
-      76,    25,     8,    10,    77,   -73,    71,     6,   -73,   -73,
-     -73,   -73,    64,    67,   -73,    83,    30,     0,    78,    58,
-     -73,    25,    10,    79,   -73,    70,    72,   -73,    20,    32,
-      10,   -73,   -73,     8,     8,    92,    21,    21,    93,   -73,
-     -73,    90,   -73,   -73,     6,    10,    10,    93,    93,    93,
-      93,    93,    93,    92,    92,    88,   -73,   -73,   -73,    51,
-      94,    95,   -73,   -73,     4,    89,    87,   -73,   -73,   -73,
-     -73,   -73,   -73,   -73,   -73,   -73,   -73,    96,    93,    93,
-      93,    93,    93,    93,    92,    92,   -73,   -73,    80,   -73,
-     -73,   -73,   -73,   -73,   -73,   -73,   -73,   -73,     9,    97,
-     -73,     6,    91,   -73
+     -96,    14,     4,   -96,   -96,   -96,    21,   -96,    27,     5,
+      42,    48,   -96,    50,   -96,    70,    74,    72,    77,    83,
+      81,   -96,    82,   -96,    55,   -96,   -96,   -96,   -96,    93,
+      90,    91,    68,   -96,    33,   -96,   -96,    87,    69,    92,
+     -96,    18,    93,   -96,    93,    96,    97,     2,   -15,   -96,
+      25,     2,   -96,   -96,   -96,   -96,   -96,    84,    86,   -96,
+      99,    26,   -96,    34,    98,   -96,     2,   -96,   -96,   -96,
+     100,   -96,    89,    94,   -96,    51,    28,   -96,   101,    25,
+      25,    -8,    83,    83,   -96,    93,   -96,   105,     2,     2,
+      93,    93,    93,    93,    93,    93,    -8,    -8,     3,   -96,
+     -96,    57,   104,   110,    44,   -96,   -96,   -96,   -96,   -96,
+     -96,   -96,   -96,   -96,   -96,   -96,   103,    93,    93,    93,
+      93,    93,    93,    -8,    -8,   -96,    95,   -96,   -96,   -96,
+     -96,   -96,   -96,   -96,   -96,   106,     3,   107,   -96
   };
 
   const unsigned char
   Parser::yydefact_[] =
   {
-       4,     0,     6,     1,    62,     8,     0,     3,     0,     2,
-       0,     5,     0,     0,    60,     7,     0,     0,     0,     0,
-       0,    20,    17,    16,     0,     9,     0,    23,    15,     0,
-       0,    62,     0,     0,     0,    19,     0,    23,    25,    26,
-      24,    44,    45,    47,    49,    51,     0,     0,     0,     0,
-      50,    61,     0,     0,    29,    30,    32,    34,     0,     0,
-       0,    18,    22,     0,     0,     0,     0,     0,     0,    11,
-      15,     0,    10,    35,     0,     0,     0,     0,     0,     0,
-       0,     0,     0,     0,     0,     0,    46,    48,    61,     0,
-       0,     0,    63,    14,     0,     0,     0,    31,    33,    36,
-      37,    40,    41,    38,    39,    42,    43,     0,     0,     0,
-       0,     0,     0,     0,     0,     0,    12,    15,    27,    21,
-      52,    53,    56,    57,    54,    55,    58,    59,     0,     0,
-      13,     0,     0,    28
+       4,     0,     0,     1,    66,     6,     0,     3,     0,     0,
+       0,     0,     8,     0,     5,     0,     0,     0,     0,     2,
+       0,    18,     0,     9,     0,    62,     7,    22,    19,    15,
+       0,     0,    25,    67,     0,    14,    17,     0,     0,     0,
+      21,     0,     0,    11,    15,     0,     0,     0,    66,    20,
+       0,     0,    24,    27,    28,    26,    46,    47,    49,    51,
+      53,     0,    16,     0,     0,    10,     0,    63,    64,    65,
+       0,    31,    32,    34,    36,     0,     0,    52,     0,     0,
+       0,     0,     0,     0,    12,    15,    37,     0,     0,     0,
+       0,     0,     0,     0,     0,     0,     0,     0,     0,    48,
+      50,     0,     0,     0,     0,    23,    33,    35,    38,    39,
+      42,    43,    40,    41,    44,    45,     0,     0,     0,     0,
+       0,     0,     0,     0,     0,    13,    29,    54,    55,    58,
+      59,    56,    57,    60,    61,     0,     0,     0,    30
   };
 
   const signed char
   Parser::yypgoto_[] =
   {
-     -73,   -73,   -73,   -73,   -73,     7,   -73,   -73,   -73,   -73,
-     -63,   -73,   -73,   -73,   -73,   -73,    69,   -72,   -73,   -73,
-      43,    34,    35,    55,   -73,   -73,    50,    48,    82,   -73,
-     -73,   -62,    -1,   -33
+     -96,   -96,   -96,   -96,   -96,     1,   -96,   -96,   -96,   -96,
+     -40,   -96,   -96,   -96,   -96,   -96,   -96,   -96,   -95,   -96,
+     -96,    67,    32,    17,    56,   -96,   -96,    46,    43,    76,
+     -96,   -96,   -80,     0,   -29
   };
 
   const signed char
   Parser::yydefgoto_[] =
   {
-      -1,     1,     2,     5,     9,     6,    19,    20,    30,    72,
-      47,     7,    11,    22,    27,    35,    36,    37,    38,    39,
-      53,    54,    55,    56,    57,    40,    41,    42,    43,    44,
-      15,    58,    45,    46
+      -1,     1,     2,     9,    19,     6,    17,    18,    31,    46,
+      34,    35,     7,    14,    28,    32,    40,    41,    52,    53,
+      54,    70,    71,    72,    73,    74,    55,    56,    57,    58,
+      59,    26,    75,    60,    61
   };
 
   const short
   Parser::yytable_[] =
   {
-      59,     8,    96,    89,     8,    31,    68,    94,     8,    31,
-      68,    31,    10,    51,    69,    68,    14,     3,   116,    59,
-      12,   105,   106,   130,     4,    13,    32,    59,    17,    33,
-      32,    34,    32,    33,    52,    93,    77,    78,    79,    80,
-      81,    82,    59,    59,    99,   100,   101,   102,   103,   104,
-     -63,   -63,   126,   127,   128,    66,    67,    83,    84,   132,
-      16,    18,    21,    24,    23,    90,    91,   108,   109,   110,
-     111,   112,   113,    25,    26,   120,   121,   122,   123,   124,
-     125,    28,    48,    29,    49,    61,    60,    63,    65,    64,
-      71,    70,    74,    75,    76,    88,    92,    95,   107,   114,
-     115,   118,   117,    85,   119,   133,    62,    73,   129,    97,
-     131,    98,    87,    86,    50
+      36,   101,     8,   116,    63,    33,    48,     4,     4,     8,
+      13,   -67,   -67,    62,     3,    36,   114,   115,    76,     8,
+      25,    48,    76,    67,    68,    69,    66,    50,    48,     5,
+      12,    51,    49,    67,    68,    69,    10,    76,    11,    42,
+      42,   137,    50,   133,   134,   104,    51,    43,    84,    50,
+      42,    15,    82,    83,    96,    97,    36,    20,   125,    76,
+      76,   108,   109,   110,   111,   112,   113,    90,    91,    92,
+      93,    94,    95,   117,   118,   119,   120,   121,   122,    16,
+      21,    22,   102,   103,    23,    24,     4,    30,   127,   128,
+     129,   130,   131,   132,    27,    29,    33,    37,    39,    38,
+      44,    47,    45,    64,    81,    65,   107,    79,    80,   123,
+      87,    85,    88,   105,    98,   124,    89,   126,    78,   136,
+     106,   138,    86,   100,   135,    99,    77
   };
 
   const unsigned char
   Parser::yycheck_[] =
   {
-      33,     2,    74,    65,     5,     3,     6,    70,     9,     3,
-       6,     3,     5,     3,    14,     6,     9,     0,    14,    52,
-      15,    83,    84,    14,     3,    11,    24,    60,     9,    27,
-      24,    29,    24,    27,    24,    68,    16,    17,    18,    19,
-      20,    21,    75,    76,    77,    78,    79,    80,    81,    82,
-      25,    26,   114,   115,   117,    25,    26,    25,    26,   131,
-       7,    30,    13,     7,    10,    66,    67,    16,    17,    18,
-      19,    20,    21,    12,     8,   108,   109,   110,   111,   112,
-     113,    13,     7,    31,     8,    14,     9,    23,     5,    22,
-      32,    13,    13,    23,    22,     3,     3,     7,    10,     5,
-       5,    14,    13,    60,     8,    14,    37,    52,    28,    75,
-      13,    76,    64,    63,    32
+      29,    81,     2,    98,    44,     3,     3,     3,     3,     9,
+       9,    26,    27,    42,     0,    44,    96,    97,    47,    19,
+      19,     3,    51,    31,    32,    33,    24,    24,     3,    25,
+      25,    28,    14,    31,    32,    33,    15,    66,    11,     6,
+       6,   136,    24,   123,   124,    85,    28,    14,    14,    24,
+       6,     9,    26,    27,    26,    27,    85,     7,    14,    88,
+      89,    90,    91,    92,    93,    94,    95,    16,    17,    18,
+      19,    20,    21,    16,    17,    18,    19,    20,    21,    31,
+      10,     7,    82,    83,    12,     8,     3,    32,   117,   118,
+     119,   120,   121,   122,    13,    13,     3,     7,    30,     8,
+      13,     9,    33,     7,     5,     8,    89,    23,    22,     5,
+      10,    13,    23,     8,    13,     5,    22,    14,    51,    13,
+      88,    14,    66,    80,    29,    79,    50
   };
 
   const unsigned char
   Parser::yystos_[] =
   {
-       0,    34,    35,     0,     3,    36,    38,    44,    65,    37,
-      38,    45,    15,    11,    38,    63,     7,     9,    30,    39,
-      40,    13,    46,    10,     7,    12,     8,    47,    13,    31,
-      41,     3,    24,    27,    29,    48,    49,    50,    51,    52,
-      58,    59,    60,    61,    62,    65,    66,    43,     7,     8,
-      61,     3,    24,    53,    54,    55,    56,    57,    64,    66,
-       9,    14,    49,    23,    22,     5,    25,    26,     6,    14,
-      13,    32,    42,    56,    13,    23,    22,    16,    17,    18,
-      19,    20,    21,    25,    26,    53,    59,    60,     3,    64,
-      65,    65,     3,    66,    43,     7,    50,    54,    55,    66,
-      66,    66,    66,    66,    66,    64,    64,    10,    16,    17,
-      18,    19,    20,    21,     5,     5,    14,    13,    14,     8,
-      66,    66,    66,    66,    66,    66,    64,    64,    43,    28,
-      14,    13,    50,    14
+       0,    35,    36,     0,     3,    25,    39,    46,    67,    37,
+      15,    11,    25,    39,    47,     9,    31,    40,    41,    38,
+       7,    10,     7,    12,     8,    39,    65,    13,    48,    13,
+      32,    42,    49,     3,    44,    45,    68,     7,     8,    30,
+      50,    51,     6,    14,    13,    33,    43,     9,     3,    14,
+      24,    28,    52,    53,    54,    60,    61,    62,    63,    64,
+      67,    68,    68,    44,     7,     8,    24,    31,    32,    33,
+      55,    56,    57,    58,    59,    66,    68,    63,    55,    23,
+      22,     5,    26,    27,    14,    13,    58,    10,    23,    22,
+      16,    17,    18,    19,    20,    21,    26,    27,    13,    61,
+      62,    66,    67,    67,    44,     8,    56,    57,    68,    68,
+      68,    68,    68,    68,    66,    66,    52,    16,    17,    18,
+      19,    20,    21,     5,     5,    14,    14,    68,    68,    68,
+      68,    68,    68,    66,    66,    29,    13,    52,    14
   };
 
   const unsigned char
   Parser::yyr1_[] =
   {
-       0,    33,    34,    35,    35,    36,    36,    37,    37,    38,
-      39,    40,    41,    42,    43,    43,    44,    45,    46,    47,
-      47,    48,    49,    49,    50,    50,    50,    51,    52,    53,
-      54,    54,    55,    55,    56,    56,    57,    57,    57,    57,
-      57,    57,    57,    57,    58,    59,    59,    60,    60,    61,
-      61,    62,    62,    62,    62,    62,    62,    62,    62,    62,
-      63,    64,    65,    66
+       0,    34,    35,    36,    36,    37,    37,    38,    38,    39,
+      40,    41,    42,    43,    44,    44,    45,    45,    46,    47,
+      48,    49,    49,    50,    51,    51,    52,    52,    52,    53,
+      54,    55,    56,    56,    57,    57,    58,    58,    59,    59,
+      59,    59,    59,    59,    59,    59,    60,    61,    61,    62,
+      62,    63,    63,    64,    64,    64,    64,    64,    64,    64,
+      64,    64,    65,    66,    66,    66,    67,    68
   };
 
   const unsigned char
   Parser::yyr2_[] =
   {
-       0,     2,     3,     2,     0,     2,     0,     2,     0,     4,
-       5,     5,     5,     5,     3,     0,     4,     3,     4,     2,
-       0,     5,     2,     0,     1,     1,     1,     5,     9,     1,
-       1,     3,     1,     3,     1,     2,     3,     3,     3,     3,
-       3,     3,     3,     3,     1,     1,     3,     1,     3,     1,
-       2,     1,     5,     5,     5,     5,     5,     5,     5,     5,
-       1,     1,     1,     1
+       0,     2,     5,     2,     0,     2,     0,     2,     0,     4,
+       6,     5,     5,     5,     1,     0,     3,     1,     4,     3,
+       4,     2,     0,     5,     2,     0,     1,     1,     1,     5,
+       9,     1,     1,     3,     1,     3,     1,     2,     3,     3,
+       3,     3,     3,     3,     3,     3,     1,     1,     3,     1,
+       3,     1,     2,     1,     5,     5,     5,     5,     5,     5,
+       5,     5,     1,     1,     1,     1,     1,     1
   };
 
 
-#if YYDEBUG
+
   // YYTNAME[SYMBOL-NUM] -- String name of the symbol SYMBOL-NUM.
   // First, the terminals, then, starting at \a yyntokens_, nonterminals.
   const char*
@@ -1678,29 +1841,30 @@ namespace depkit { namespace yy {
   "$end", "error", "$undefined", "C_IDENTIFIER", "C_DOUBLE", "S_DOT",
   "S_COMMA", "S_COLON", "S_SEMI", "S_LPR", "S_RPR", "S_LSR", "S_RSR",
   "S_LBR", "S_RBR", "S_ASSIGN", "S_EQ", "S_NE", "S_GE", "S_LE", "S_GT",
-  "S_LT", "S_AND", "S_OR", "S_NOT", "K_IN", "K_NIN", "K_IF", "K_ELSE",
-  "K_REQ", "K_V", "K_F", "K_B", "$accept", "terms", "definitions",
-  "dependencies", "requirements", "package_identification",
+  "S_LT", "S_AND", "S_OR", "S_NOT", "S_SEP", "K_IN", "K_NIN", "K_IF",
+  "K_ELSE", "K_REQ", "K_V", "K_F", "K_B", "$accept", "terms",
+  "definitions", "dependencies", "requirements", "package_identification",
   "property_list", "version_list", "feature_list", "backend_list",
-  "tok_list", "package_definition", "package_dependency", "dep_body",
-  "require_list", "require_clause", "depend_list", "depend_clause",
-  "if_package", "if_else_package", "property_expr", "prop_expr_or",
-  "prop_expr_and", "prop_expr_not", "prop_expr_atom", "package_expr",
-  "package_expr_or", "package_expr_and", "package_expr_not",
-  "package_expr_atom", "requirement", "prop_name", "name", "str", YY_NULLPTR
+  "tok_list", "tok_list_nonempty", "package_definition",
+  "package_dependency", "dep_body", "require_list", "require_clause",
+  "depend_list", "depend_clause", "if_package", "if_else_package",
+  "property_expr", "prop_expr_or", "prop_expr_and", "prop_expr_not",
+  "prop_expr_atom", "package_expr", "package_expr_or", "package_expr_and",
+  "package_expr_not", "package_expr_atom", "requirement", "prop_name",
+  "name", "str", YY_NULLPTR
   };
 
-
+#if YYDEBUG
   const unsigned char
   Parser::yyrline_[] =
   {
-       0,    70,    70,    74,    75,    79,    80,    84,    85,    89,
-      93,    98,   102,   106,   110,   111,   115,   119,   123,   127,
-     128,   132,   136,   137,   141,   142,   143,   147,   151,   156,
-     160,   161,   165,   166,   170,   171,   175,   176,   177,   178,
-     179,   180,   181,   182,   186,   190,   191,   195,   196,   200,
-     201,   205,   206,   207,   208,   209,   210,   211,   212,   213,
-     217,   221,   225,   229
+       0,    72,    72,    76,    77,    81,    82,    86,    87,    91,
+      95,   100,   104,   108,   112,   113,   117,   118,   122,   126,
+     130,   134,   135,   139,   143,   144,   148,   149,   150,   154,
+     158,   163,   167,   168,   172,   173,   177,   178,   182,   183,
+     184,   185,   186,   187,   188,   189,   193,   197,   198,   202,
+     203,   207,   208,   212,   213,   214,   215,   216,   217,   218,
+     219,   220,   224,   228,   229,   230,   234,   238
   };
 
   // Print the state stack on the debug stream.
@@ -1735,14 +1899,14 @@ namespace depkit { namespace yy {
 
 #line 5 "parser.yy"
 } } // depkit::yy
-#line 1739 "parser.cpp"
+#line 1903 "parser.cpp"
 
-#line 232 "parser.yy"
+#line 241 "parser.yy"
 
 
-void depkit::yy::Parser::error(const std::string& msg)
+void depkit::yy::Parser::error(const location& loc, const std::string& msg)
 {
-	std::cerr << msg << std::endl;
-	if (lexer.size() == 0) 
-		lexer.matcher().winput();
+  std::cerr << loc << ": " << msg << std::endl;
+  if (lexer.size() == 0)      // if token is unknown (no match)
+    lexer.matcher().winput(); // skip character
 }
