@@ -26,7 +26,7 @@ cmake ..
 cmake --build .
 ```
 
-## Uasge
+## UsAge
 
 ``` 
 /* Definitions */
