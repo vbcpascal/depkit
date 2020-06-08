@@ -5,7 +5,7 @@
 
 DepKit is a typed language for advanced package management. This project implements a DepKit compiler.
 
-If you are not familiar with the grammar of DepKit, you can start [here](). Or you can read the [examples](https://github.com/vbcpascal/depkit/tree/master/examples) here, for the syntax of DepKit is very simple.
+If you are not familiar with the grammar of DepKit, you can start [here](https://github.com/vbcpascal/depkit/tree/master/doc/grammar.md). Or you can read the [examples](https://github.com/vbcpascal/depkit/tree/master/examples) here, for the syntax of DepKit is very simple.
 
 ## Build
 
@@ -94,4 +94,4 @@ You can also output the result to a file with option `--output`. Use `./depkit -
 
 ## Contributors
 
-[Zhichao Guan](https://github.com/vbcpascal) and [Pengcheng Xu](https://github.com/KireinaHoro/) designed this for [Design Principles of Programming language](https://xiongyingfei.github.io/DPPL/2020/main.htm).
+[Zhichao Guan](https://github.com/vbcpascal) and [Pengcheng Xu](https://github.com/KireinaHoro/) designed this for [Design Principles of Programming Language](https://xiongyingfei.github.io/DPPL/2020/main.htm).
