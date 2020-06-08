@@ -2,11 +2,11 @@
 
 DepKit is a typed language for advanced package management. This project implements a DepKit compiler.
 
-If you are not familiar with the grammar of DepKit, you can start here. Or you can read the examples here, for the syntax of DepKit is very simple.
+If you are not familiar with the grammar of DepKit, you can start [here](). Or you can read the [examples](https://github.com/vbcpascal/depkit/tree/master/examples) here, for the syntax of DepKit is very simple.
 
 ## Build
 
-DepKit needs some dependencies: RE-flex, bison, z3 and docopt. You can visit their page for more details.
+DepKit needs some dependencies: [RE-flex](https://www.genivia.com/doc/reflex/html/index.html), [bison](https://www.gnu.org/software/bison/), [z3](https://github.com/Z3Prover/z3) and [docopt](https://github.com/docopt/docopt.cpp). You can visit their pages for more details.
 
 After installing these tools, you can try to compile our project.
 
@@ -91,6 +91,4 @@ You can also output the result to a file with option `--output`. Use `./depkit -
 
 ## Contributors
 
-[Zhichao Guan](https://github.com/vbcpascal) and [Pengcheng Xu](https://github.com/KireinaHoro/)
-
-for class [Design Principles of Programming language](https://xiongyingfei.github.io/DPPL/2020/main.htm).
+[Zhichao Guan](https://github.com/vbcpascal) and [Pengcheng Xu](https://github.com/KireinaHoro/) designed this for [Design Principles of Programming language](https://xiongyingfei.github.io/DPPL/2020/main.htm).
