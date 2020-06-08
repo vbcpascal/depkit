@@ -4,3 +4,6 @@
 [submodule "3rd-party/docopt.cpp"]
 	path = 3rd-party/docopt.cpp
 	url = https://github.com/docopt/docopt.cpp
+[submodule "3rd-party/z3"]
+	path = 3rd-party/z3
+	url = https://github.com/Z3Prover/z3
