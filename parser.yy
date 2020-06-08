@@ -7,7 +7,11 @@
 %define api.value.type variant
 %define api.token.constructor
 %define parse.assert
+%define parse.trace true
+%define parse.error verbose
 %defines
+
+%locations
 
 %code top {
 #include <cstdio>
@@ -35,10 +39,10 @@ TermsPtr terms;
 }
 
 /* tokens */
-%token <std::string> C_IDENTIFIER
-%token <double>	C_DOUBLE
+
+%token <std::string> C_IDENTIFIER C_DOUBLE
 %token <int>	S_DOT S_COMMA S_COLON S_SEMI S_LPR S_RPR S_LSR S_RSR S_LBR S_RBR 
-%token <int>	S_ASSIGN S_EQ S_NE S_GE S_LE S_GT S_LT S_AND S_OR S_NOT 
+%token <int>	S_ASSIGN S_EQ S_NE S_GE S_LE S_GT S_LT S_AND S_OR S_NOT S_SEP
 %token <int>	K_IN K_NIN K_IF K_ELSE K_REQ K_V K_F K_B
 
 /* types */
@@ -49,11 +53,8 @@ TermsPtr terms;
 %type <std::list<DependencyPtr>>    dependencies
 %type <std::list<RequirementPtr>>	requirements
 %type <IdentificationPtr>			package_identification
-%type <PropertyListPtr>				property_list
-%type <std::list<Version>>			version_list
-%type <std::list<Feature>>			feature_list
-%type <std::list<Backend>>			backend_list
-%type <std::list<std::string>>		tok_list
+%type <PropertyListPtr>				property_list			
+%type <std::list<std::string>>		tok_list tok_list_nonempty version_list feature_list backend_list
 %type <DefinitionPtr>				package_definition
 %type <DependencyPtr>				package_dependency dep_body
 %type <RequirementPtr>				requirement
@@ -67,12 +68,12 @@ TermsPtr terms;
 %%
 
 terms
-	: definitions dependencies requirements		{ $$ = std::make_shared<Terms>($1, $2, $3); }
+	: definitions S_SEP dependencies S_SEP requirements		{ terms = std::make_shared<Terms>($1, $3, $5); }
 	;
 
 definitions
 	: definitions package_definition			{ $1.push_back($2); $$ = $1; }
-	| %empty									{ $$ = std::list<DefinitonPtr>(); }
+	| %empty									{ $$ = std::list<DefinitionPtr>(); }
 	;
 
 dependencies
@@ -90,7 +91,7 @@ package_identification
 	;
 
 property_list
-	: version_list S_SEMI feature_list S_SEMI backend_list
+	: version_list S_SEMI feature_list S_SEMI backend_list S_SEMI 
 												{ $$ = std::make_shared<PropertyList>($1, $3, $5); }
 	;
 
@@ -107,8 +108,13 @@ backend_list
 	;
 
 tok_list
-	: tok_list S_COMMA str						{ $1.push_back($3); $$ = $1; }
+	: tok_list_nonempty				{ $$ = $1; }
 	| %empty									{ $$ = std::list<std::string>(); }
+	;
+
+tok_list_nonempty
+	: tok_list S_COMMA str						{ $1.push_back($3); $$ = $1; }
+	| str									{ $$ = std::list<std::string>(); $$.push_back($1); }
 	;
 
 package_definition
@@ -117,6 +123,7 @@ package_definition
 
 package_dependency
 	: package_identification S_COLON dep_body	{ $3->identification_ = $1; $$ = $3; }
+	| name S_COLON dep_body { $3->identification_ = std::make_shared<Identification>($1); $$ = $3; }
 	;
 
 dep_body
@@ -133,7 +140,7 @@ require_clause
 	;
 
 depend_list
-	: depend_clause depend_list					{ $1.push_back($2); $$ = $1; }
+	: depend_list depend_clause					{ $1.push_back($2); $$ = $1; }
 	| %empty									{ $$ = std::list<PackageExprPtr>(); }
 	;
 
@@ -144,12 +151,12 @@ depend_clause
 	;
 
 if_package
-	: K_IF property_expr S_LBR depend_clause S_RBR	{ $$ = std::make_shared<IfPackagePtr>($2, $4); }
+	: K_IF property_expr S_LBR depend_clause S_RBR	{ $$ = std::make_shared<IfPackage>($2, $4); }
 	;
 
 if_else_package
 	: K_IF property_expr S_LBR depend_clause S_RBR K_ELSE S_LBR depend_clause S_RBR
-												{ $$ = std::make_shared<IfElsePackagePtr>($2, $4, $8); }
+												{ $$ = std::make_shared<IfElsePackage>($2, $4, $8); }
 	;
 
 property_expr
@@ -167,8 +174,8 @@ prop_expr_and
 	;
 
 prop_expr_not
-	: prop_expr_atom							{ $$ = $1; }
-	| S_NOT prop_expr_not						{ $$ = std::make_shared<PropExprBinary>(UnaryType::NOT, $2); }
+	: prop_expr_atom								{ $$ = $1; }
+	| S_NOT prop_expr_not						{ $$ = std::make_shared<PropExprUnary>(UnaryType::NOT, $2); }
 	;
 
 prop_expr_atom
@@ -198,7 +205,7 @@ package_expr_and
 
 package_expr_not
 	: package_expr_atom							{ $$ = $1; }
-	| S_NOT package_expr_not					{ $$ = std::make_shared<PackageExprBinary>(UnaryType::NOT, $2); }
+	| S_NOT package_expr_not					{ $$ = std::make_shared<PackageExprUnary>(UnaryType::NOT, $2); }
 	;
 
 package_expr_atom
@@ -209,8 +216,8 @@ package_expr_atom
 	| name S_DOT prop_name S_LT str				{ $$ = std::make_shared<PackageExprAtomWithProp>(AtomType::LT, $1, $3, $5); }
 	| name S_DOT prop_name S_GE str				{ $$ = std::make_shared<PackageExprAtomWithProp>(AtomType::GE, $1, $3, $5); }
 	| name S_DOT prop_name S_LE str				{ $$ = std::make_shared<PackageExprAtomWithProp>(AtomType::LE, $1, $3, $5); }
-	| str K_IN name S_DOT prop_name				{ $$ = std::make_shared<PackageExprAtomWithProp>(AtomType::IN, $5, $1, $3); }
-	| str K_NIN name S_DOT prop_name			{ $$ = std::make_shared<PackageExprAtomWithProp>(AtomType::NIN, $5, $1, $3); }
+	| str K_IN name S_DOT prop_name				{ $$ = std::make_shared<PackageExprAtomWithProp>(AtomType::IN, $3, $5, $1); }
+	| str K_NIN name S_DOT prop_name			{ $$ = std::make_shared<PackageExprAtomWithProp>(AtomType::NIN, $3, $5, $1); }
 	;
 
 requirement
@@ -218,7 +225,9 @@ requirement
 	;
 
 prop_name
-	: C_IDENTIFIER								{ $$ = $1; }
+	: K_V		{ $$ = "version"; }
+	| K_F		{ $$ = "feature"; }
+	| K_B		{ $$ = "backend"; }
 	;
 
 name
@@ -227,13 +236,14 @@ name
 
 str
 	: C_IDENTIFIER								{ $$ = $1; }
+	| C_DOUBLE										{ $$ = $1; }
 	;
 
 %%
 
-void depkit::yy::Parser::error(const std::string& msg)
+void depkit::yy::Parser::error(const location& loc, const std::string& msg)
 {
-	std::cerr << msg << std::endl;
-	if (lexer.size() == 0) 
-		lexer.matcher().winput();
+  std::cerr << loc << ": " << msg << std::endl;
+  if (lexer.size() == 0)      // if token is unknown (no match)
+    lexer.matcher().winput(); // skip character
 }

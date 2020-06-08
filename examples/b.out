@@ -1,0 +1,14 @@
+(define-fun LLVM () Bool
+  true)
+(define-fun z3.version () Real
+  (/ 24.0 5.0))
+(define-fun z3.feat.debug () Bool
+  false)
+(define-fun z3 () Bool
+  true)
+(define-fun LLVM.feat.debug () Bool
+  false)
+(define-fun LLVM.feat.z3 () Bool
+  true)
+(define-fun LLVM.version () Real
+  10.0)

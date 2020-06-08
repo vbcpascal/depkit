@@ -1,0 +1,31 @@
+LLVM [
+  version: {9.0, 10.0};
+  feature: {gold, debug, z3};
+  backend: {AArch-64, RISC-V};
+] = ()
+
+z3 [
+  version: {4.8, 4.7, 3.5};
+  feature: {debug};
+  backend: {AArch-64, RISC-V};
+] = ()
+
+%%
+
+LLVM : {
+  require (z3 in feature || version < 10.0);
+  if z3 in feature {
+    z3  
+  }
+  if z3 in feature && debug in feature {
+    debug in z3.feature
+  }
+}
+
+%%
+
+LLVM [
+  version: {10.0};
+  feature: {z3};
+  backend: {};
+]

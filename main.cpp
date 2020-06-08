@@ -1,11 +1,62 @@
 #include "codegen.h"
+#include "docopt.h"
 #include "lex.hpp"
+#include "option.h"
 #include "parser.hpp"
+#include "printer.h"
 #include "z3++.h"
+
+#include <fstream>
+
+static const char USAGE[] =
+    R"(DepKit Compiler.
+
+    Usage:
+      depkit [--oa FILE] [--ob FILE] [--output FILE] <input>
+      depkit (-s | --stdin) [--oa FILE] [--ob FILE] [--output FILE]
+      depkit (-h | --help)
+      depkit --version
+
+    Options:
+      -h --help           Show this screen.
+      -v --version        Show version.
+      -s --stdin          Read program from stdin instead of input file.
+      -o --output FILE    Print result to the file instead of stdout.
+      -a --oa FILE        Print SMT-LIB format constraint file to the file.
+      -b --ob FILE        Print SMT-LIB format module file to the file.
+    )";
 
 using namespace depkit;
 
 extern TermsPtr terms;
+Options options;
+CodeGenZ3 cg;
+
+void parse() {
+  if (options.readFromStdin) {
+    yy::Lexer lexer(std::cin);
+    yy::Parser parser(lexer);
+    if (parser.parse() != 0)
+      ERROR("DepKit: [Error] Syntax error.")
+  } else {
+    std::ifstream in(options.inputFile, std::ios::in);
+    yy::Lexer lexer(in);
+    yy::Parser parser(lexer);
+    if (parser.parse() != 0)
+      ERROR("DepKit: [Error] Syntax error.")
+  }
+}
+
+void codegen() {
+  cg.codegen(terms);
+  if (options.printSMTConstraint) {
+    std::ofstream out(options.constraintFile, std::ios::out);
+    cg.print(out);
+  }
+}
+
+void solve() { cg.solve(options); }
+
 #define TEST_LOG(Msg) printf("\033[;1m%s\033[0m\n", Msg);
 
 void build_example() {
@@ -108,24 +159,31 @@ void build_example() {
   cg.print();
 }
 
-void testParser() {
-  TEST_LOG("-- Test parser --");
-  yy::Lexer lexer(std::cin);
-  yy::Parser parser(lexer);
-  if (parser.parse() != 0)
-    ERROR("Parse failed.");
-  TEST_LOG("Parse succeed!")
-}
+int main(int argc, const char **argv) {
+  std::map<std::string, docopt::value> args = docopt::docopt(
+      USAGE, {argv + 1, argv + argc}, true, "DepKit Compiler 1.0.");
 
-void testCodeGen() {
-  TEST_LOG("-- Test codegen --");
-  CodeGenZ3 cg;
-  cg.codegen(terms);
-  cg.print();
-}
+  if (args["--stdin"].asBool()) {
+    options.readFromStdin = true;
+  }
+  if (args["--oa"].isString()) {
+    options.printSMTConstraint = true;
+    options.constraintFile = args["--oa"].asString();
+  }
+  if (args["--ob"].isString()) {
+    options.printSMTResult = true;
+    options.resultFile = args["--ob"].asString();
+  }
+  if (args["--output"].isString()) {
+    options.outputToFile = true;
+    options.outputFile = args["--output"].asString();
+  }
+  if (args["<input>"].isString()) {
+    options.inputFile = args["<input>"].asString();
+  }
 
-int main() {
-  testParser();
-  testCodeGen();
+  parse();
+  codegen();
+  solve();
   return 0;
 }

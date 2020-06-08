@@ -104,7 +104,7 @@ class Lexer : public reflex::AbstractLexer<reflex::Matcher> {
 
 depkit::yy::Parser::symbol_type depkit::yy::Lexer::yylex()
 {
-  static const char *REGEX_INITIAL = "(?m)((?:\\Q.\\E))|((?:\\Q,\\E))|((?:\\Q:\\E))|((?:\\Q;\\E))|((?:\\Q(\\E))|((?:\\Q)\\E))|((?:\\Q[\\E))|((?:\\Q]\\E))|((?:\\Q{\\E))|((?:\\Q}\\E))|((?:\\Q=\\E))|((?:\\Q==\\E))|((?:\\Q!=\\E))|((?:\\Q>=\\E))|((?:\\Q<=\\E))|((?:\\Q>\\E))|((?:\\Q<\\E))|((?:\\Q&&\\E))|((?:\\Q||\\E))|((?:\\Q!\\E))|((?:\\Q%%\\E))|((?:\\Qin\\E))|((?:\\Qnot in\\E))|((?:\\Qif\\E))|((?:\\Qelse\\E))|((?:\\Qrequire\\E))|((?:\\Qversion\\E))|((?:\\Qfeature\\E))|((?:\\Qbackend\\E))|((?:[\\x09\\x0a\\x0d\\x20]+))|((?:(?://.*?\\n)|(?:/\\*.*?\\*/)))|((?:[\\x2b\\x2d.0-9A-Z_a-z]*))|(.)";
+  static const char *REGEX_INITIAL = "(?m)((?:\\Q.\\E))|((?:\\Q,\\E))|((?:\\Q:\\E))|((?:\\Q;\\E))|((?:\\Q(\\E))|((?:\\Q)\\E))|((?:\\Q[\\E))|((?:\\Q]\\E))|((?:\\Q{\\E))|((?:\\Q}\\E))|((?:\\Q=\\E))|((?:\\Q==\\E))|((?:\\Q!=\\E))|((?:\\Q>=\\E))|((?:\\Q<=\\E))|((?:\\Q>\\E))|((?:\\Q<\\E))|((?:\\Q&&\\E))|((?:\\Q||\\E))|((?:\\Q!\\E))|((?:\\Q%%\\E))|((?:\\Qin\\E))|((?:\\Qnot in\\E))|((?:\\Qif\\E))|((?:\\Qelse\\E))|((?:\\Qrequire\\E))|((?:\\Qversion\\E))|((?:\\Qfeature\\E))|((?:\\Qbackend\\E))|((?:[\\x09\\x0a\\x0d\\x20]+))|((?:(?://.*?\\n)|(?:/\\*.*?\\*/)))|((?:[\\x2b\\x2d]?[0-9]+\\.[0-9]*))|((?:[A-Z_a-z][\\x2d0-9A-Z_a-z]*))|(.)";
   static const reflex::Pattern PATTERN_INITIAL(REGEX_INITIAL);
   if (!has_matcher())
   {
@@ -249,13 +249,17 @@ return TOKEN(K_B);
 #line 57 "lex.l"
 ; /* skip */
             break;
-          case 32: // rule at line 58: (?:[\x2b\x2d.0-9A-Z_a-z]*)
+          case 32: // rule at line 58: (?:[\x2b\x2d]?[0-9]+\.[0-9]*)
 #line 58 "lex.l"
+return Parser::make_C_DOUBLE(str(), location());
+            break;
+          case 33: // rule at line 59: (?:[A-Z_a-z][\x2d0-9A-Z_a-z]*)
+#line 59 "lex.l"
 return Parser::make_C_IDENTIFIER(str(), location());
 
             break;
-          case 33: // rule at line 60: .
-#line 60 "lex.l"
+          case 34: // rule at line 61: .
+#line 61 "lex.l"
 ERROR("Unknown token: %s", text());
 
             break;

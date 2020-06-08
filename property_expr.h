@@ -18,11 +18,12 @@ using PropExprPtr = std::shared_ptr<PropExpr>;
 
 class PropExprUnary : public PropExpr {
 public:
-  PropExprUnary() : PropExpr(PropExprType::Unary) {}
+  PropExprUnary() : PropExpr(expr_type_) {}
   PropExprUnary(UnaryType type, PropExprPtr &expr)
-      : PropExpr(PropExprType::Unary), expr_(expr) {}
+      : PropExpr(expr_type_), type_(type), expr_(expr) {}
 
 public:
+  static constexpr PropExprType expr_type_ = PropExprType::Unary;
   UnaryType type_;
   PropExprPtr expr_;
 };
@@ -30,11 +31,12 @@ using PropExprUnaryPtr = std::shared_ptr<PropExprUnary>;
 
 class PropExprBinary : public PropExpr {
 public:
-  PropExprBinary() : PropExpr(PropExprType::Binary) {}
+  PropExprBinary() : PropExpr(expr_type_) {}
   PropExprBinary(BinaryType type, PropExprPtr &lhs, PropExprPtr &rhs)
-      : PropExpr(PropExprType::Binary), lhs_(lhs), rhs_(rhs) {}
+      : PropExpr(expr_type_), type_(type), lhs_(lhs), rhs_(rhs) {}
 
 public:
+  static constexpr PropExprType expr_type_ = PropExprType::Binary;
   BinaryType type_;
   PropExprPtr lhs_;
   PropExprPtr rhs_;
@@ -46,13 +48,14 @@ class PropExprAtom : public PropExpr {
 public:
   PropExprAtom(AtomType type, const PropName &prop_name,
                const std::string &string)
-      : PropExpr(PropExprType::Atom), type_(type), prop_name_(prop_name),
+      : PropExpr(expr_type_), type_(type), prop_name_(prop_name),
         string_(string) {}
 
   PropExprAtom(const PropName &prop_name, const std::string &string)
-      : PropExpr(PropExprType::Atom), prop_name_(prop_name), string_(string) {}
+      : PropExpr(expr_type_), prop_name_(prop_name), string_(string) {}
 
 public:
+  static constexpr PropExprType expr_type_ = PropExprType::Atom;
   AtomType type_;
   PropName prop_name_; // `prop-name` in BNF
   std::string string_; // `string` in BNF

@@ -1,8 +1,10 @@
 #pragma once
 
+#include <fstream>
 #include <map>
 #include <vector>
 
+#include "option.h"
 #include "terms.h"
 #include "z3++.h"
 
@@ -46,7 +48,9 @@ enum class CurrState : int {
 class CodeGenZ3 {
 public:
   void codegen(const TermsPtr &terms);
-  void print() { std::cout << *solver_ << std::endl; }
+  void solve(const Options &options);
+
+  void print(std::ostream &os = std::cout) { os << *solver_ << std::endl; }
 
 private:
   void buildSolver();
@@ -74,6 +78,8 @@ private:
   z3::expr Visit(const PackageExprBinaryPtr &e);
 
   PackageCodeGen &get_pack(const std::string &pack_name) noexcept;
+
+  void handleModel(const z3::model &m, std::ostream &os = std::cout);
 
   z3::context ctx_;
   std::shared_ptr<z3::solver> solver_;

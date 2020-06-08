@@ -410,9 +410,6 @@ namespace depkit { namespace yy {
       // terms
       char dummy8[sizeof (TermsPtr)];
 
-      // C_DOUBLE
-      char dummy9[sizeof (double)];
-
       // S_DOT
       // S_COMMA
       // S_COLON
@@ -442,35 +439,36 @@ namespace depkit { namespace yy {
       // K_V
       // K_F
       // K_B
-      char dummy10[sizeof (int)];
+      char dummy9[sizeof (int)];
 
       // definitions
-      char dummy11[sizeof (std::list<DefinitionPtr>)];
+      char dummy10[sizeof (std::list<DefinitionPtr>)];
 
       // dependencies
-      char dummy12[sizeof (std::list<DependencyPtr>)];
+      char dummy11[sizeof (std::list<DependencyPtr>)];
 
       // depend_list
-      char dummy13[sizeof (std::list<PackageExprPtr>)];
+      char dummy12[sizeof (std::list<PackageExprPtr>)];
 
       // require_list
-      char dummy14[sizeof (std::list<PropExprPtr>)];
+      char dummy13[sizeof (std::list<PropExprPtr>)];
 
       // requirements
-      char dummy15[sizeof (std::list<RequirementPtr>)];
+      char dummy14[sizeof (std::list<RequirementPtr>)];
 
       // version_list
       // feature_list
       // backend_list
       // tok_list
       // tok_list_nonempty
-      char dummy16[sizeof (std::list<std::string>)];
+      char dummy15[sizeof (std::list<std::string>)];
 
       // C_IDENTIFIER
+      // C_DOUBLE
       // prop_name
       // name
       // str
-      char dummy17[sizeof (std::string)];
+      char dummy16[sizeof (std::string)];
     };
 
     /// The size of the largest semantic type.
@@ -707,19 +705,6 @@ namespace depkit { namespace yy {
       {}
 #endif
 #if 201103L <= YY_CPLUSPLUS
-      basic_symbol (typename Base::kind_type t, double&& v, location_type&& l)
-        : Base (t)
-        , value (std::move (v))
-        , location (std::move (l))
-      {}
-#else
-      basic_symbol (typename Base::kind_type t, const double& v, const location_type& l)
-        : Base (t)
-        , value (v)
-        , location (l)
-      {}
-#endif
-#if 201103L <= YY_CPLUSPLUS
       basic_symbol (typename Base::kind_type t, int&& v, location_type&& l)
         : Base (t)
         , value (std::move (v))
@@ -891,10 +876,6 @@ switch (yytype)
         value.template destroy< TermsPtr > ();
         break;
 
-      case 4: // C_DOUBLE
-        value.template destroy< double > ();
-        break;
-
       case 5: // S_DOT
       case 6: // S_COMMA
       case 7: // S_COLON
@@ -956,6 +937,7 @@ switch (yytype)
         break;
 
       case 3: // C_IDENTIFIER
+      case 4: // C_DOUBLE
       case 66: // prop_name
       case 67: // name
       case 68: // str
@@ -1051,19 +1033,6 @@ switch (yytype)
       }
 #endif
 #if 201103L <= YY_CPLUSPLUS
-      symbol_type (int tok, double v, location_type l)
-        : super_type(token_type (tok), std::move (v), std::move (l))
-      {
-        YYASSERT (tok == token::C_DOUBLE);
-      }
-#else
-      symbol_type (int tok, const double& v, const location_type& l)
-        : super_type(token_type (tok), v, l)
-      {
-        YYASSERT (tok == token::C_DOUBLE);
-      }
-#endif
-#if 201103L <= YY_CPLUSPLUS
       symbol_type (int tok, int v, location_type l)
         : super_type(token_type (tok), std::move (v), std::move (l))
       {
@@ -1080,13 +1049,13 @@ switch (yytype)
       symbol_type (int tok, std::string v, location_type l)
         : super_type(token_type (tok), std::move (v), std::move (l))
       {
-        YYASSERT (tok == token::C_IDENTIFIER);
+        YYASSERT (tok == token::C_IDENTIFIER || tok == token::C_DOUBLE);
       }
 #else
       symbol_type (int tok, const std::string& v, const location_type& l)
         : super_type(token_type (tok), v, l)
       {
-        YYASSERT (tok == token::C_IDENTIFIER);
+        YYASSERT (tok == token::C_IDENTIFIER || tok == token::C_DOUBLE);
       }
 #endif
     };
@@ -1144,14 +1113,14 @@ switch (yytype)
 #if 201103L <= YY_CPLUSPLUS
       static
       symbol_type
-      make_C_DOUBLE (double v, location_type l)
+      make_C_DOUBLE (std::string v, location_type l)
       {
         return symbol_type (token::C_DOUBLE, std::move (v), std::move (l));
       }
 #else
       static
       symbol_type
-      make_C_DOUBLE (const double& v, const location_type& l)
+      make_C_DOUBLE (const std::string& v, const location_type& l)
       {
         return symbol_type (token::C_DOUBLE, v, l);
       }
@@ -1647,7 +1616,7 @@ switch (yytype)
   // number is the opposite.  If YYTABLE_NINF, syntax error.
   static const short yytable_[];
 
-  static const unsigned char yycheck_[];
+  static const short yycheck_[];
 
   // YYSTOS[STATE-NUM] -- The (internal number of the) accessing
   // symbol of state STATE-NUM.
@@ -1897,7 +1866,7 @@ switch (yytype)
     enum
     {
       yyeof_ = 0,
-      yylast_ = 126,     ///< Last index in yytable_.
+      yylast_ = 135,     ///< Last index in yytable_.
       yynnts_ = 35,  ///< Number of nonterminal symbols.
       yyfinal_ = 3, ///< Termination state number.
       yyterror_ = 1,
@@ -2016,10 +1985,6 @@ switch (yytype)
         value.move< TermsPtr > (std::move (that.value));
         break;
 
-      case 4: // C_DOUBLE
-        value.move< double > (std::move (that.value));
-        break;
-
       case 5: // S_DOT
       case 6: // S_COMMA
       case 7: // S_COLON
@@ -2081,6 +2046,7 @@ switch (yytype)
         break;
 
       case 3: // C_IDENTIFIER
+      case 4: // C_DOUBLE
       case 66: // prop_name
       case 67: // name
       case 68: // str
@@ -2147,10 +2113,6 @@ switch (yytype)
         value.copy< TermsPtr > (YY_MOVE (that.value));
         break;
 
-      case 4: // C_DOUBLE
-        value.copy< double > (YY_MOVE (that.value));
-        break;
-
       case 5: // S_DOT
       case 6: // S_COMMA
       case 7: // S_COLON
@@ -2212,6 +2174,7 @@ switch (yytype)
         break;
 
       case 3: // C_IDENTIFIER
+      case 4: // C_DOUBLE
       case 66: // prop_name
       case 67: // name
       case 68: // str
@@ -2285,10 +2248,6 @@ switch (yytype)
         value.move< TermsPtr > (YY_MOVE (s.value));
         break;
 
-      case 4: // C_DOUBLE
-        value.move< double > (YY_MOVE (s.value));
-        break;
-
       case 5: // S_DOT
       case 6: // S_COMMA
       case 7: // S_COLON
@@ -2350,6 +2309,7 @@ switch (yytype)
         break;
 
       case 3: // C_IDENTIFIER
+      case 4: // C_DOUBLE
       case 66: // prop_name
       case 67: // name
       case 68: // str
@@ -2430,7 +2390,7 @@ switch (yytype)
 
 #line 5 "parser.yy"
 } } // depkit::yy
-#line 2434 "parser.hpp"
+#line 2394 "parser.hpp"
 
 
 

@@ -1,3 +1,6 @@
 [submodule "3rd-party/RE-flex"]
 	path = 3rd-party/RE-flex
 	url = https://github.com/Genivia/RE-flex
+[submodule "3rd-party/docopt.cpp"]
+	path = 3rd-party/docopt.cpp
+	url = https://github.com/docopt/docopt.cpp

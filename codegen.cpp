@@ -20,6 +20,79 @@ void CodeGenZ3::codegen(const TermsPtr &terms) {
   VisitRequirements(terms);
 }
 
+void CodeGenZ3::solve(const Options &options) {
+  if (solver_->check() == z3::unsat) {
+    if (options.outputToFile) {
+      std::ofstream out(options.outputFile, std::ios::out);
+      out << "Cannot install due to conflict" << std::endl;
+    } else {
+      std::cout << "Cannot install due to conflict" << std::endl;
+    }
+  } else {
+    z3::model m = solver_->get_model();
+    if (options.printSMTResult) {
+      std::ofstream out(options.resultFile, std::ios::out);
+      out << m << std::endl;
+    }
+    if (options.outputToFile) {
+      std::ofstream out(options.outputFile, std::ios::out);
+      handleModel(m, out);
+    } else {
+      handleModel(m);
+    }
+  }
+}
+
+void CodeGenZ3::handleModel(const z3::model &m, std::ostream &os) {
+  z3::set_param("pp.decimal", true);
+  for (auto &pp : packs_) {
+    std::string pack_name = pp.first;
+    auto &pack = pp.second;
+    if (m.eval(pack.package_).is_true()) {
+      // check each feature and backend
+      std::vector<std::string> feat_req, feat_no, feat_opt;
+      std::vector<std::string> back_req, back_no, back_opt;
+      for (auto &sf : pack.features_) {
+        std::string name = sf.first;
+        z3::expr res = m.eval(sf.second);
+        if (res.is_true())
+          feat_req.push_back(name);
+        else if (res.is_false())
+          feat_no.push_back(name);
+        else
+          feat_opt.push_back(name);
+      }
+      for (auto &sf : pack.backends_) {
+        std::string name = sf.first;
+        z3::expr res = m.eval(sf.second);
+        if (res.is_true())
+          back_req.push_back(name);
+        else if (res.is_false())
+          back_no.push_back(name);
+        else
+          back_opt.push_back(name);
+      }
+
+      // print
+      os << pack_name << " " << m.eval(pack.version_) << std::endl;
+      os << "  features: ";
+      for (auto &s : feat_req)
+        os << s << " ";
+      os << "[ ";
+      for (auto &s : feat_opt)
+        os << s << " ";
+      os << "]\n";
+      os << "  backends: ";
+      for (auto &s : back_req)
+        os << s << " ";
+      os << "[ ";
+      for (auto &s : back_opt)
+        os << s << " ";
+      os << "]\n";
+    }
+  }
+}
+
 void CodeGenZ3::buildSolver() { solver_ = std::make_shared<z3::solver>(ctx_); }
 
 void CodeGenZ3::addVersionConstraint() {
