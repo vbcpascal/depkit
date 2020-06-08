@@ -1,5 +1,10 @@
 # DepKit Compiler
 
+```
+[![language](https://img.shields.io/badge/C%2B%2B-17-blue)](https://en.wikipedia.org/wiki/C%2B%2B#Standardization)
+[![license](https://img.shields.io/badge/license-AGPL--v3.0-blueviolet)](https://opensource.org/licenses/MIT)
+```
+
 DepKit is a typed language for advanced package management. This project implements a DepKit compiler.
 
 If you are not familiar with the grammar of DepKit, you can start [here](). Or you can read the [examples](https://github.com/vbcpascal/depkit/tree/master/examples) here, for the syntax of DepKit is very simple.
