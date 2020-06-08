@@ -7,7 +7,6 @@ project ("depkit")
 
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 17)
-# set(CMAKE_CXX_FLAGS "-fsanitize=address")
 
 set(Z3_DIR "3rd-party/z3/build")
 
@@ -22,9 +21,11 @@ message(STATUS "Z3_DIR: ${Z3_DIR}")
 find_package(docopt REQUIRED CONFIG)
 
 # source files
-file(GLOB SRC "*.hpp" "*.h" "*.cpp")
-add_executable(depkit ${SRC})
+file(GLOB proj_HEADERS "include/*.h" "include/*.hpp" "include/*.hh")
+file(GLOB proj_SOURCES "lib/*.cpp" "lib/parser/*.cpp")
+add_executable(depkit ${proj_HEADERS} ${proj_SOURCES})
 
+include_directories(./include)
 target_include_directories(depkit PRIVATE ${DOCOPT_INCLUDE_DIRS})
 target_include_directories(depkit PRIVATE ${Z3_CXX_INCLUDE_DIRS})
 target_include_directories(depkit PRIVATE "/Users/guanzhichao/Softwares/reflex/include")
