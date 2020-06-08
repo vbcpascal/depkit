@@ -1,3 +1,5 @@
+/* Definitions */
+
 LLVM [
   version: {9.0, 10.0};
   feature: {gold, debug, z3};
@@ -12,6 +14,8 @@ z3 [
 
 %%
 
+/* Dependencies */
+
 LLVM : {
   require (z3 in feature || version < 10.0);
   if z3 in feature {
@@ -24,8 +28,23 @@ LLVM : {
 
 %%
 
+/* Requirements */
+
 LLVM [
   version: {10.0};
   feature: {z3};
   backend: {};
 ]
+
+/*
+
+ Output:
+ 
+ LLVM 10.0
+   features: z3 [ gold ]
+   backends: [ AArch-64 RISC-V ]
+ z3 4.8
+   features: [ ]
+   backends: [ AArch-64 RISC-V ]
+
+*/

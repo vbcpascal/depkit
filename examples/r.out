@@ -1,6 +1,0 @@
-LLVM 10.0
-  features: z3 [ gold ]
-  backends: [ AArch-64 RISC-V ]
-z3 4.8
-  features: [ ]
-  backends: [ AArch-64 RISC-V ]

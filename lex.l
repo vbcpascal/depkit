@@ -16,7 +16,7 @@ extern int yylex();
 
 ws				[ \t\n\r]+
 comment_line	\/\/.*?\n
-comment_block	\/\*.*?\*\/
+comment_block	\/\*(.|\n)*?\*\/
 comment			{comment_line}|{comment_block}
 name			[a-zA-Z_][-a-zA-Z0-9_]*
 fpnum			[-+]?[0-9]+\.[0-9]*
